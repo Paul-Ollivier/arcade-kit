@@ -12,14 +12,19 @@ sprites bundled (with its own hashed URLs) automatically — no copying files in
 
 ## Install
 
-It's a private git dependency. Add to a consuming app:
+It's a public git dependency — no token or SSH key needed (locally or in CI).
+Add to a consuming app:
 
 ```jsonc
 // package.json
 "dependencies": {
-  "@domin8/arcade-kit": "github:<owner>/arcade-kit#semver:^1.0.0"
+  "@domin8/arcade-kit": "github:Paul-Ollivier/arcade-kit#v1.0.0"
 }
 ```
+
+Pin a **tag**, not a range: bun resolves a `github:` dependency's `#fragment`
+as a git ref, not an npm semver range (`#semver:^1.0.0` does not work). To
+upgrade, bump the tag in `package.json`.
 
 Because the package ships source, each Next.js consumer must transpile it:
 
@@ -29,11 +34,6 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@domin8/arcade-kit"],
 };
 ```
-
-> **Private-repo installs in CI/Coolify:** the build environment needs read
-> access to this repo. Either use an SSH dependency URL with a deploy key, or
-> provide a `GITHUB_TOKEN` and rewrite HTTPS auth in the build (e.g.
-> `git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"`).
 
 ## Use
 
@@ -51,9 +51,11 @@ up.
 
 ## Versioning
 
-Semver. Breaking visual or API changes bump the major; consumers pin a range
-(`^1`) and upgrade deliberately. Tag releases (`v1.0.0`) so the `#semver:` range
-resolves.
+Tag every release (`v1.0.0`, `v1.1.0`, …) following semver intent — breaking
+visual or API changes bump the major. Consumers pin a tag and bump it
+deliberately when they want the change. (Git deps can't express npm ranges via
+bun; if range-based upgrades become important, publish to GitHub Packages
+instead.)
 
 ## Compatibility
 
