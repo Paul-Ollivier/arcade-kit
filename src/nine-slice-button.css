@@ -1,0 +1,13 @@
+/* NineSliceButton interaction states. The bright face brightens on hover; on
+   press the label sinks toward the bevel so the button reads as physically
+   depressed. Imported by nine-slice-button.tsx so the component ships its own
+   behaviour — consumers don't need to copy these rules. */
+.nine-btn {
+  -webkit-tap-highlight-color: transparent;
+  transition: filter 90ms ease;
+}
+.nine-btn:hover:not(:disabled) { filter: brightness(1.07); }
+.nine-btn:active:not(:disabled) { filter: brightness(0.97); }
+.nine-btn:active:not(:disabled) .nine-btn__content { transform: translateY(2px); }
+.nine-btn__content { transition: transform 60ms ease; }
+.nine-btn:disabled { filter: grayscale(0.55) brightness(0.7); cursor: not-allowed; }

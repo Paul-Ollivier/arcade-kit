@@ -1,0 +1,31 @@
+{
+  "name": "@domin8/arcade-kit",
+  "version": "1.0.0",
+  "description": "Shared pixel-art arcade UI for the Domin8 hub and its games — 9-slice buttons, bitmap fonts, and their sprite assets.",
+  "license": "UNLICENSED",
+  "private": false,
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": ">=18",
+    "typescript": "^5"
+  }
+}
