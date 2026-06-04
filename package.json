@@ -1,7 +1,7 @@
 {
   "name": "@domin8/arcade-kit",
-  "version": "1.1.0",
-  "description": "Shared pixel-art arcade UI for the Domin8 hub and its games — 9-slice buttons, 9-slice panels, bitmap fonts, and their sprite assets.",
+  "version": "1.2.0",
+  "description": "Shared pixel-art arcade UI for the Domin8 hub and its games — 9-slice buttons, panels, inputs, bitmap fonts, and their sprite assets.",
   "license": "UNLICENSED",
   "private": false,
   "type": "module",

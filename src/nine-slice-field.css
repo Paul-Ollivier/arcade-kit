@@ -1,0 +1,7 @@
+/* White nine-slice arcade input (nine-slice-field.tsx) — the typed value rides
+   the white button-sprite face, so the placeholder needs a mid-grey that reads
+   on white. (Placeholder colour can't be set inline, hence this stylesheet.) */
+.nine-field::placeholder {
+  color: #9a96a8;
+  letter-spacing: 0.04em;
+}
