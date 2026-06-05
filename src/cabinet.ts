@@ -25,10 +25,10 @@ export function isCabinet(): boolean {
   );
 }
 
-/** True when the cabinet launched us in demo mode (`?demo=true`). */
-export function isDemo(): boolean {
+/** True when the cabinet launched us in free-play mode (`?freeplay=true`). */
+export function isFreePlay(): boolean {
   if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).get("demo") === "true";
+  return new URLSearchParams(window.location.search).get("freeplay") === "true";
 }
 
 function post(data: Record<string, unknown>): void {
@@ -39,7 +39,7 @@ function post(data: Record<string, unknown>): void {
 }
 
 /** Notify the hub of a game outcome so it can animate the cabinet.
- *  balance — the player's new absolute balance after the game (demo mode). */
+ *  balance — the player's new absolute balance after the game (free play). */
 export function postGameOver(result: GameResult, balance?: number): void {
   post({ type: "domin8:game-over", result, ...(balance !== undefined ? { balance } : {}) });
 }
@@ -52,7 +52,7 @@ export function postExit(): void {
 /**
  * Fire the shared "play for real" call-to-action. The hub opens its onboarding
  * flow (log in → connect wallet → deposit) as an overlay on top of the running
- * game, so an unconnected demo player converts without losing their place.
+ * game, so a free-play player converts without losing their place.
  */
 export function postPlayForReal(): void {
   post({ type: "domin8:play-for-real" });
