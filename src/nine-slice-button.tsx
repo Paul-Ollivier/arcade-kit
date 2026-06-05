@@ -2,11 +2,14 @@
 
 import { type ButtonHTMLAttributes, type CSSProperties, forwardRef } from "react";
 import { BitmapText } from "./bitmap-font";
-import { assetUrl } from "./asset-url";
-import outlinePng from "./assets/button-outline.png";
-import outlinePressedPng from "./assets/button-outline-pressed.png";
-import fillPng from "./assets/button-fill.png";
-import fillPressedPng from "./assets/button-fill-pressed.png";
+import {
+  BUTTON_SPRITE_URLS,
+  UNIT,
+  CORNER,
+  BEVEL,
+  TOP_PRESSED,
+  BEVEL_PRESSED,
+} from "./button-geometry";
 import "./nine-slice-button.css";
 
 /**
@@ -16,7 +19,7 @@ import "./nine-slice-button.css";
  *   • Fill     (16×16) — the full rounded-rect silhouette (white), used as a
  *                        single 9-slice mask. The element behind it paints a
  *                        two-stop gradient (face `color` → `shadowColor` bevel
- *                        for the bottom BEVEL_H px), so one painted box yields
+ *                        for the bottom BEVEL px), so one painted box yields
  *                        both tones with NO seam between them.
  *   • Outlines (16×16) — black frame + inner white highlight, drawn on top.
  *
@@ -30,33 +33,16 @@ import "./nine-slice-button.css";
  * instead of ballooning when the button is large. All crisp detail (rounded
  * corners, outline thickness, bevel lip) is `pixelScale * n`; only the solid
  * face stretches to fill any extra height/width via 9-slice. The outline's
- * inner highlight is held in a fixed `BEVEL_H`-px bottom slice, so it stays a
+ * inner highlight is held in a fixed `BEVEL`-px bottom slice, so it stays a
  * single crisp row pinned to the face/bevel seam at any size. (`scale` is a px
  * shorthand: pixelScale = `${scale}px`.)
  */
 
-const SRC = {
-  outline:        assetUrl(outlinePng),
-  fill:           assetUrl(fillPng),
-  // Pressed twins (both 16×16). The whole cap is shifted DOWN 2 px — the top
-  // 2 rows are cleared, the bevel band is thinned 3 px → 1 px, and the bottom
-  // frame stays put — so the button reads as sunk into its socket: a 2-px gap
-  // opens above and the bottom edge holds. Because the art moved down, the
-  // 9-slice top inset grows to TOP_PRESSED (2-px gap + 3-px corner) and the
-  // outline's bottom inset shrinks to BEVEL_H_PRESSED. Swapped in on :active
-  // via the `--outline` / `--fill-mask` vars.
-  outlinePressed: assetUrl(outlinePressedPng),
-  fillPressed:    assetUrl(fillPressedPng),
-};
-
-// Native-px geometry of the source art. The press state shifts the cap down by
-// (TOP_PRESSED − CORNER) = 2 px and thins the lip by (BEVEL_H − BEVEL_H_PRESSED)
-// = 2 px; both are flipped through CSS vars in the :active rule.
-const UNIT_H          = 16; // full button height
-const CORNER          =  3; // resting 9-slice inset — rounded-corner staircase depth
-const TOP_PRESSED     =  5; // pressed top inset: 2-px sink gap + 3-px corner
-const BEVEL_H         =  6; // resting dark-fill band height (outline bottom inset)
-const BEVEL_H_PRESSED =  4; // pressed dark-fill band height — seam sits 2 px lower
+// Sprites + native-px geometry come from the shared, renderer-agnostic module
+// (`button-geometry`) so this DOM adapter and the Pixi adapter stay in lockstep.
+// The press state shifts the cap down by SINK px and thins the lip by SINK px;
+// both are flipped through CSS vars in the :active rule.
+const SRC = BUTTON_SPRITE_URLS;
 
 const DEFAULT_SCALE = 4;
 const DEFAULT_LIGHT = "#ffd21e"; // bright, saturated gold
@@ -116,7 +102,7 @@ export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProp
   const ps = pixelScale ?? `${scale}px`;
   // native-px count → rendered length at the current pixel scale.
   const u = (n: number) => `calc(${ps} * ${n})`;
-  const h = height ?? u(UNIT_H);
+  const h = height ?? u(UNIT);
   const bevel = shadowColor ?? darken(color, 0.32);
   // The label rides the retro 8×8 bitmap font (basicpixel) so it reads as
   // pixel-art arcade type rather than a smooth UI font. Sized in font-pixels
@@ -154,8 +140,8 @@ export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProp
     "--u":               ps,
     "--slice-top-rest":  String(CORNER),
     "--slice-top-press": String(TOP_PRESSED),
-    "--bevel-rest":      String(BEVEL_H),
-    "--bevel-press":     String(BEVEL_H_PRESSED),
+    "--bevel-rest":      String(BEVEL),
+    "--bevel-press":     String(BEVEL_PRESSED),
     "--outline-rest":    `url("${SRC.outline}")`,
     "--outline-press":   `url("${SRC.outlinePressed}")`,
     "--fill-rest":       `url("${SRC.fill}")`,
@@ -176,7 +162,7 @@ export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProp
         minWidth:       u(16),
         // Content rides the light face, so reserve the fixed bevel lip as
         // bottom padding and give a little breathing room each side.
-        padding:        `0 ${u(4)} ${u(BEVEL_H)}`,
+        padding:        `0 ${u(4)} ${u(BEVEL)}`,
         border:         "none",
         background:     "none",
         color:          textColor,
