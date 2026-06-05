@@ -5,9 +5,28 @@
 .nine-btn {
   -webkit-tap-highlight-color: transparent;
   transition: filter 90ms ease;
+  /* Resting state of the four press-sensitive vars. They are SET only here and
+     in :active (never inline) so :active wins; the rest/press operands they
+     select come from the component's inline styles. `--slice-top` is the top
+     9-slice inset, `--bevel-h` the bottom inset (also the gradient seam),
+     `--outline`/`--fill-mask` the sprites. */
+  --slice-top: var(--slice-top-rest);
+  --bevel-h:   var(--bevel-rest);
+  --outline:   var(--outline-rest);
+  --fill-mask: var(--fill-rest);
 }
 .nine-btn:hover:not(:disabled) { filter: brightness(1.07); }
-.nine-btn:active:not(:disabled) { filter: brightness(0.97); }
-.nine-btn:active:not(:disabled) .nine-btn__content { transform: translateY(2px); }
+/* Pressed: swap to the shifted-down sprites and grow the top inset / shrink the
+   bottom inset to match. The cap sinks 2 px (a gap opens at the top, the bottom
+   edge holds) and the lip thins 3 px → 1 px. The label sinks the same 2 px to
+   stay centred on the face. */
+.nine-btn:active:not(:disabled) {
+  filter: brightness(0.97);
+  --slice-top: var(--slice-top-press);
+  --bevel-h:   var(--bevel-press);
+  --outline:   var(--outline-press);
+  --fill-mask: var(--fill-press);
+}
+.nine-btn:active:not(:disabled) .nine-btn__content { transform: translateY(calc(var(--u) * 2)); }
 .nine-btn__content { transition: transform 60ms ease; }
 .nine-btn:disabled { filter: grayscale(0.55) brightness(0.7); cursor: not-allowed; }

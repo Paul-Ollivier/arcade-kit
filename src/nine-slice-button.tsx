@@ -4,7 +4,9 @@ import { type ButtonHTMLAttributes, type CSSProperties, forwardRef } from "react
 import { BitmapText } from "./bitmap-font";
 import { assetUrl } from "./asset-url";
 import outlinePng from "./assets/button-outline.png";
+import outlinePressedPng from "./assets/button-outline-pressed.png";
 import fillPng from "./assets/button-fill.png";
+import fillPressedPng from "./assets/button-fill-pressed.png";
 import "./nine-slice-button.css";
 
 /**
@@ -34,17 +36,27 @@ import "./nine-slice-button.css";
  */
 
 const SRC = {
-  outline: assetUrl(outlinePng),
-  // Full rounded-rect silhouette (light face + dark bevel unioned), used as a
-  // single 9-slice mask over a two-stop gradient — one painted fill, so no
-  // sub-pixel seam between face and bevel.
-  fill: assetUrl(fillPng),
+  outline:        assetUrl(outlinePng),
+  fill:           assetUrl(fillPng),
+  // Pressed twins (both 16×16). The whole cap is shifted DOWN 2 px — the top
+  // 2 rows are cleared, the bevel band is thinned 3 px → 1 px, and the bottom
+  // frame stays put — so the button reads as sunk into its socket: a 2-px gap
+  // opens above and the bottom edge holds. Because the art moved down, the
+  // 9-slice top inset grows to TOP_PRESSED (2-px gap + 3-px corner) and the
+  // outline's bottom inset shrinks to BEVEL_H_PRESSED. Swapped in on :active
+  // via the `--outline` / `--fill-mask` vars.
+  outlinePressed: assetUrl(outlinePressedPng),
+  fillPressed:    assetUrl(fillPressedPng),
 };
 
-// Native-px geometry of the source art.
-const UNIT_H  = 16; // full button height (10 face + 6 bevel)
-const BEVEL_H =  6; // dark-fill band height
-const CORNER  =  3; // 9-slice inset — the rounded-corner staircase is 3 px deep
+// Native-px geometry of the source art. The press state shifts the cap down by
+// (TOP_PRESSED − CORNER) = 2 px and thins the lip by (BEVEL_H − BEVEL_H_PRESSED)
+// = 2 px; both are flipped through CSS vars in the :active rule.
+const UNIT_H          = 16; // full button height
+const CORNER          =  3; // resting 9-slice inset — rounded-corner staircase depth
+const TOP_PRESSED     =  5; // pressed top inset: 2-px sink gap + 3-px corner
+const BEVEL_H         =  6; // resting dark-fill band height (outline bottom inset)
+const BEVEL_H_PRESSED =  4; // pressed dark-fill band height — seam sits 2 px lower
 
 const DEFAULT_SCALE = 4;
 const DEFAULT_LIGHT = "#ffd21e"; // bright, saturated gold
@@ -59,22 +71,21 @@ function darken(hex: string, f: number): string {
 }
 
 /**
- * Build a 9-slice mask-border style (standard + -webkit-) for a white fill PNG
- * with a uniform `slice` inset (native px); `fill` keeps the center so the
- * solid face shows through. `u(n)` renders a native-px count at the current
- * pixel scale. Cast through a string record because the vendor longhands aren't
- * in React's CSSProperties.
+ * Build a 9-slice mask-border style (standard + -webkit-) from a white fill PNG.
+ * `source` is a full CSS image value (a `url(...)` or a `var(...)` resolving to
+ * one); `slice` / `width` are full 4-side shorthands ("top right bottom left",
+ * `slice` ending in `fill` so the center silhouette shows through). They take
+ * vars so the rest/pressed swap happens in CSS. Cast through a string record
+ * because the vendor longhands aren't in React's CSSProperties.
  */
-function maskBorder(src: string, slice: number, u: (n: number) => string): CSSProperties {
-  const source = `url("${src}")`;
-  const width = u(slice);
+function maskBorder(source: string, slice: string, width: string): CSSProperties {
   const v: Record<string, string> = {
     WebkitMaskBoxImageSource: source,
-    WebkitMaskBoxImageSlice:  `${slice} fill`,
+    WebkitMaskBoxImageSlice:  slice,
     WebkitMaskBoxImageWidth:  width,
     WebkitMaskBoxImageRepeat: "stretch",
     maskBorderSource: source,
-    maskBorderSlice:  `${slice} fill`,
+    maskBorderSlice:  slice,
     maskBorderWidth:  width,
     maskBorderRepeat: "stretch",
   };
@@ -129,11 +140,34 @@ export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProp
     pointerEvents:  "none",
   };
 
+  // Press-sensitive values are routed through CSS vars so a single `:active`
+  // rule (in the stylesheet) flips them for mouse, touch AND keyboard — no
+  // React state, no re-render. The four live vars — `--slice-top` (top 9-slice
+  // inset), `--bevel-h` (bottom inset + gradient seam), `--outline`, `--fill-
+  // mask` — are SET only in the stylesheet (default vs :active) so :active wins
+  // over these inline styles. Here we expose the unit plus the rest/press
+  // OPERANDS the stylesheet selects between, keeping every magic number/URL in
+  // one place. `topLen`/`bevelLen` resolve the live insets to a rendered length.
+  const topLen   = `calc(${ps} * var(--slice-top))`;
+  const bevelLen = `calc(${ps} * var(--bevel-h))`;
+  const cssVars = {
+    "--u":               ps,
+    "--slice-top-rest":  String(CORNER),
+    "--slice-top-press": String(TOP_PRESSED),
+    "--bevel-rest":      String(BEVEL_H),
+    "--bevel-press":     String(BEVEL_H_PRESSED),
+    "--outline-rest":    `url("${SRC.outline}")`,
+    "--outline-press":   `url("${SRC.outlinePressed}")`,
+    "--fill-rest":       `url("${SRC.fill}")`,
+    "--fill-press":      `url("${SRC.fillPressed}")`,
+  } as Record<string, string>;
+
   return (
     <button
       ref={ref}
       className={`nine-btn font-mono${className ? ` ${className}` : ""}`}
       style={{
+        ...(cssVars as CSSProperties),
         position:       "relative",
         display:        "inline-flex",
         alignItems:     "center",
@@ -169,8 +203,16 @@ export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProp
           top:        0,
           bottom:     0,
           zIndex:     0,
-          background: `linear-gradient(to bottom, ${color} 0, ${color} calc(100% - ${u(BEVEL_H)}), ${bevel} calc(100% - ${u(BEVEL_H)}), ${bevel} 100%)`,
-          ...maskBorder(SRC.fill, CORNER, u),
+          background: `linear-gradient(to bottom, ${color} 0, ${color} calc(100% - ${bevelLen}), ${bevel} calc(100% - ${bevelLen}), ${bevel} 100%)`,
+          // Silhouette mask. Top inset is the live `--slice-top` (grows on press
+          // to hold the 2-px sink gap + corner); bottom/sides stay CORNER. The
+          // gradient seam (at 100% − bevelLen) and the mask's pressed top-gap
+          // together drop the cap and thin the lip.
+          ...maskBorder(
+            "var(--fill-mask)",
+            `var(--slice-top) ${CORNER} ${CORNER} ${CORNER} fill`,
+            `${topLen} ${u(CORNER)} ${u(CORNER)} ${u(CORNER)}`,
+          ),
         }}
       />
       {/* Black outline + white highlight — drawn over both fills. Top corners
@@ -184,11 +226,11 @@ export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProp
           bottom:            0,
           zIndex:            2,
           borderStyle:       "solid",
-          borderWidth:       `${u(CORNER)} ${u(CORNER)} ${u(BEVEL_H)} ${u(CORNER)}`,
+          borderWidth:       `${topLen} ${u(CORNER)} ${bevelLen} ${u(CORNER)}`,
           borderColor:       "transparent",
-          borderImageSource: `url("${SRC.outline}")`,
-          borderImageSlice:  `${CORNER} ${CORNER} ${BEVEL_H} ${CORNER} fill`,
-          borderImageWidth:  `${u(CORNER)} ${u(CORNER)} ${u(BEVEL_H)} ${u(CORNER)}`,
+          borderImageSource: `var(--outline)`,
+          borderImageSlice:  `var(--slice-top) ${CORNER} var(--bevel-h) ${CORNER} fill`,
+          borderImageWidth:  `${topLen} ${u(CORNER)} ${bevelLen} ${u(CORNER)}`,
           borderImageRepeat: "stretch",
         }}
       />
