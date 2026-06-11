@@ -13,16 +13,16 @@
 export type GameResult = "win" | "lose";
 
 /**
- * True when running inside the cabinet — either embedded in a parent frame, or
- * launched with the `?cabinet` flag (covers same-origin dev embeds where
- * `window.parent === window` wouldn't otherwise distinguish).
+ * True when running inside the hub's arcade cabinet, which always launches
+ * games with the `?cabinet` flag on the URL. Detection keys off that flag
+ * ALONE — deliberately not `window.parent !== window` — because the games also
+ * run as Telegram Mini Apps, which Telegram embeds in an iframe; the old iframe
+ * heuristic mistook that for the cabinet and made games reserve hub-chrome
+ * safe-area space that doesn't exist there.
  */
 export function isCabinet(): boolean {
   if (typeof window === "undefined") return false;
-  return (
-    window.parent !== window ||
-    new URLSearchParams(window.location.search).has("cabinet")
-  );
+  return new URLSearchParams(window.location.search).has("cabinet");
 }
 
 /** True when the cabinet launched us in free-play mode (`?freeplay=true`). */
