@@ -9,6 +9,8 @@ export { assetUrl } from "./asset-url";
 export { isCabinet, isFreePlay, postGameOver, postExit, postPlayForReal } from "./cabinet";
 export type { GameResult } from "./cabinet";
 export { PlayForRealButton } from "./play-for-real-button";
+export { PlayModeToggle } from "./play-mode-toggle";
+export type { PlayMode, PlayModeToggleProps } from "./play-mode-toggle";
 // Renderer-agnostic button primitives (also consumed by the Pixi adapter at
 // `@domin8/arcade-kit/pixi`). Exposed so games can read the shared geometry.
 export {
