@@ -1,7 +1,7 @@
 export { NineSliceButton } from "./nine-slice-button";
 export type { NineSliceButtonProps } from "./nine-slice-button";
 export { NineSlicePanel } from "./nine-slice-panel";
-export type { NineSlicePanelProps } from "./nine-slice-panel";
+export type { NineSlicePanelProps, NineSlicePanelVariant } from "./nine-slice-panel";
 export { NineSliceField } from "./nine-slice-field";
 export type { NineSliceFieldProps } from "./nine-slice-field";
 export { BitmapText, TitleText } from "./bitmap-font";
