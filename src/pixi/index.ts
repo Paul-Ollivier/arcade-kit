@@ -4,3 +4,5 @@
 export { NineButton, measureButtonLabel, BUTTON_ASSET_ALIASES } from "./nine-button";
 export type { NineButtonOptions } from "./nine-button";
 export { loadButtonAssets } from "./load-assets";
+export { loadArcadeFonts, registerGridBitmapFont, FONT_OUTLINE, FONT_BASIC } from "./bitmap-fonts";
+export type { GridBitmapFontSpec } from "./bitmap-fonts";
