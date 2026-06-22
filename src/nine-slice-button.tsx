@@ -136,6 +136,21 @@ export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProp
   // one place. `topLen`/`bevelLen` resolve the live insets to a rendered length.
   const topLen   = `calc(${ps} * var(--slice-top))`;
   const bevelLen = `calc(${ps} * var(--bevel-h))`;
+  // The two-tone face: full `color` down to the bevel seam, then `bevel` for the
+  // fixed bottom lip. Shared verbatim by the masked silhouette AND the solid
+  // backing below so their colours line up pixel-for-pixel at every row.
+  const faceGradient = `linear-gradient(to bottom, ${color} 0, ${color} calc(100% - ${bevelLen}), ${bevel} calc(100% - ${bevelLen}), ${bevel} 100%)`;
+  // Seamless backing inset. 9-slice masks rasterise each of their 9 tiles with
+  // independent rounding, so at a fractional pixelScale the center↔edge tile
+  // seams open <1px gaps that leak the dark page THROUGH the masked fill. We
+  // paint the identical gradient behind, clipped (no tiling → no seams) to a
+  // rect that stays inside the silhouette in BOTH rest and pressed states yet
+  // overhangs every interior seam by 1px. From the sprite art: the topmost
+  // full-width row is `slice-top`-dependent (2px rest / 4px pressed → top inset
+  // = (slice-top − 1)·ps), the bottom lip's full row sits 2px in, and the side
+  // rails reach the very edge (inset 0). `clip-path` is anti-aliased but always
+  // hidden under the opaque masked interior, so its edges never show.
+  const backInset = `calc(${ps} * (var(--slice-top) - 1)) 0px ${u(CORNER - 1)} 0px`;
   const cssVars = {
     "--u":               ps,
     "--slice-top-rest":  String(CORNER),
@@ -177,6 +192,23 @@ export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProp
       }}
       {...rest}
     >
+      {/* Seamless backing — the same gradient, NO mask, clipped to a rect that
+          lives inside the silhouette. Sits under the masked fill and shows
+          through its 9-slice tile seams with matching colour instead of the
+          dark page, killing the hairline gaps that appear when a large button
+          renders at a fractional pixelScale. */}
+      <span
+        aria-hidden
+        style={{
+          ...layerBase,
+          top:            0,
+          bottom:         0,
+          zIndex:         0,
+          background:     faceGradient,
+          clipPath:       `inset(${backInset})`,
+          WebkitClipPath: `inset(${backInset})`,
+        }}
+      />
       {/* Tinted fill — ONE silhouette-masked box with a two-stop gradient: the
           face color down to the bevel line, then the bevel color for the fixed
           lip. A single painted element means there's no sub-pixel seam between
@@ -188,8 +220,8 @@ export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProp
           ...layerBase,
           top:        0,
           bottom:     0,
-          zIndex:     0,
-          background: `linear-gradient(to bottom, ${color} 0, ${color} calc(100% - ${bevelLen}), ${bevel} calc(100% - ${bevelLen}), ${bevel} 100%)`,
+          zIndex:     1,
+          background: faceGradient,
           // Silhouette mask. Top inset is the live `--slice-top` (grows on press
           // to hold the 2-px sink gap + corner); bottom/sides stay CORNER. The
           // gradient seam (at 100% − bevelLen) and the mask's pressed top-gap
