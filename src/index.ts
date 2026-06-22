@@ -7,6 +7,7 @@ export type { NineSliceFieldProps } from "./nine-slice-field";
 export { BitmapText, TitleText } from "./bitmap-font";
 export { assetUrl } from "./asset-url";
 export { CHAT_BUBBLE_URL } from "./chat-bubble";
+export { GLOVE_POINTER_URL } from "./glove";
 export { GOLDEN_COIN_URLS } from "./coins";
 export { isCabinet, isFreePlay, postGameOver, postExit, postPlayForReal } from "./cabinet";
 export type { GameResult } from "./cabinet";

@@ -24,6 +24,7 @@ Two subpath entries (both resolve straight to source):
 - `BitmapText`, `TitleText` (`bitmap-font.tsx`) — `BitmapText` uses `basicpixel_8x8.png` as a CSS mask (color inherits); `TitleText` uses `font-8x7-outline.png` as a background image (own palette, auto upper-cased).
 - `assetUrl` (`asset-url.ts`) — normalises a PNG import that's either a URL string (bare bundler) or a Next `StaticImageData` object.
 - `GOLDEN_COIN_URLS` (`coins.ts`) — the six-frame golden-coin spin as resolved URLs (source in `assets/golden-coin.aseprite`). One canonical gold coin for every game/hub; the Pixi adapter wraps it in a ready-to-load helper.
+- `CHAT_BUBBLE_URL` (`chat-bubble.ts`) / `GLOVE_POINTER_URL` (`glove.ts`) — resolved URLs for the hub's chat-tab icon and the cabinet's flanking pointing-glove nav arrow. Plain URL strings (for `<img src>` / `url(...)`), so the hub no longer carries its own `/public` copies.
 - Cabinet bridge (`cabinet.ts`): `isCabinet`, `isFreePlay`, `postGameOver`, `postExit`, `postPlayForReal`, type `GameResult`. The other end is the hub (`GAME_ORIGINS` whitelist).
 - `PlayForRealButton` (`play-for-real-button.tsx`), `PlayModeToggle` + `PlayMode` (`play-mode-toggle.tsx`).
 - Renderer-agnostic button geometry (`button-geometry.ts`): `BUTTON_SPRITE_URLS`, `UNIT`, `CORNER`, `BEVEL`, `SINK`, `TOP_PRESSED`, `BEVEL_PRESSED` — shared with the Pixi adapter.
@@ -39,7 +40,7 @@ It's a **public git dependency** — no token/SSH needed. Consumers pin a **tag*
 "@domin8/arcade-kit": "github:Paul-Ollivier/arcade-kit#v1.9.0"
 ```
 
-Bun resolves the `#fragment` as a git ref, **not** an npm semver range — `#semver:^1.0.0` does NOT work. Current published tag: **v1.11.0** (added the shared golden coin). Tags follow semver intent (breaking visual/API change → major). Hub is on v1.10.0; RR is on v1.11.0 (uses the shared coin); flip/arena lag (v1.7.0/v1.9.0).
+Bun resolves the `#fragment` as a git ref, **not** an npm semver range — `#semver:^1.0.0` does NOT work. Current published tag: **v1.12.0** (added `GLOVE_POINTER_URL`; v1.11.0 added the shared golden coin). Tags follow semver intent (breaking visual/API change → major). Hub is on v1.12.0 (uses the shared coin sprites' siblings — glove); RR is on v1.11.0 (shared coin); flip/arena lag (v1.7.0/v1.9.0).
 
 **Release flow:** bump `version` in `package.json`, commit, `git tag vX.Y.Z`, push tag, then bump the `#vX.Y.Z` ref in each downstream repo's `package.json` deliberately. Downstream upgrades are opt-in — nothing auto-updates.
 
