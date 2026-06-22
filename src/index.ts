@@ -6,6 +6,7 @@ export { NineSliceField } from "./nine-slice-field";
 export type { NineSliceFieldProps } from "./nine-slice-field";
 export { BitmapText, TitleText } from "./bitmap-font";
 export { assetUrl } from "./asset-url";
+export { CHAT_BUBBLE_URL } from "./chat-bubble";
 export { isCabinet, isFreePlay, postGameOver, postExit, postPlayForReal } from "./cabinet";
 export type { GameResult } from "./cabinet";
 export { PlayForRealButton } from "./play-for-real-button";
