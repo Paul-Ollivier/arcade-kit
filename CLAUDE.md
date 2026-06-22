@@ -23,12 +23,13 @@ Two subpath entries (both resolve straight to source):
 - `NineSliceField` (`nine-slice-field.tsx` + `.css`).
 - `BitmapText`, `TitleText` (`bitmap-font.tsx`) — `BitmapText` uses `basicpixel_8x8.png` as a CSS mask (color inherits); `TitleText` uses `font-8x7-outline.png` as a background image (own palette, auto upper-cased).
 - `assetUrl` (`asset-url.ts`) — normalises a PNG import that's either a URL string (bare bundler) or a Next `StaticImageData` object.
+- `GOLDEN_COIN_URLS` (`coins.ts`) — the six-frame golden-coin spin as resolved URLs (source in `assets/golden-coin.aseprite`). One canonical gold coin for every game/hub; the Pixi adapter wraps it in a ready-to-load helper.
 - Cabinet bridge (`cabinet.ts`): `isCabinet`, `isFreePlay`, `postGameOver`, `postExit`, `postPlayForReal`, type `GameResult`. The other end is the hub (`GAME_ORIGINS` whitelist).
 - `PlayForRealButton` (`play-for-real-button.tsx`), `PlayModeToggle` + `PlayMode` (`play-mode-toggle.tsx`).
 - Renderer-agnostic button geometry (`button-geometry.ts`): `BUTTON_SPRITE_URLS`, `UNIT`, `CORNER`, `BEVEL`, `SINK`, `TOP_PRESSED`, `BEVEL_PRESSED` — shared with the Pixi adapter.
 
 ### Pixi adapter (`src/pixi/index.ts`)
-- `NineButton` + `measureButtonLabel` + `BUTTON_ASSET_ALIASES` (`pixi/nine-button.ts`), `loadButtonAssets` (`pixi/load-assets.ts`), `loadArcadeFonts` / `registerGridBitmapFont` / `FONT_OUTLINE` / `FONT_BASIC` (`pixi/bitmap-fonts.ts`). Shares `button-geometry` with the DOM kit.
+- `NineButton` + `measureButtonLabel` + `BUTTON_ASSET_ALIASES` (`pixi/nine-button.ts`), `loadButtonAssets` + `loadCoinAssets` + `GOLDEN_COIN_ALIASES` (`pixi/load-assets.ts`), `loadArcadeFonts` / `registerGridBitmapFont` / `FONT_OUTLINE` / `FONT_BASIC` (`pixi/bitmap-fonts.ts`). Shares `button-geometry` with the DOM kit. `loadCoinAssets()` registers the six golden-coin frames under `GOLDEN_COIN_ALIASES` (read a frame with `Assets.get(GOLDEN_COIN_ALIASES[n])`).
 
 ## How consumers depend on it (git tag, NOT npm)
 
@@ -38,7 +39,7 @@ It's a **public git dependency** — no token/SSH needed. Consumers pin a **tag*
 "@domin8/arcade-kit": "github:Paul-Ollivier/arcade-kit#v1.9.0"
 ```
 
-Bun resolves the `#fragment` as a git ref, **not** an npm semver range — `#semver:^1.0.0` does NOT work. Current published tag: **v1.9.0**. Tags follow semver intent (breaking visual/API change → major). Hub is on v1.9.0; flip/RR currently lag (v1.7.x).
+Bun resolves the `#fragment` as a git ref, **not** an npm semver range — `#semver:^1.0.0` does NOT work. Current published tag: **v1.11.0** (added the shared golden coin). Tags follow semver intent (breaking visual/API change → major). Hub is on v1.10.0; RR is on v1.11.0 (uses the shared coin); flip/arena lag (v1.7.0/v1.9.0).
 
 **Release flow:** bump `version` in `package.json`, commit, `git tag vX.Y.Z`, push tag, then bump the `#vX.Y.Z` ref in each downstream repo's `package.json` deliberately. Downstream upgrades are opt-in — nothing auto-updates.
 
