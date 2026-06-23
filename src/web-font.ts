@@ -11,13 +11,13 @@
 //
 // Monospace, 8px cell → crispest at font sizes that are multiples of 8px.
 
-import { assetUrl } from "./asset-url";
-import woff2 from "./assets/d8-pixel.woff2";
-
 /** CSS `font-family` of the kit pixel web font. */
 export const PIXEL_FONT_FAMILY = "D8 Pixel";
 
-const FONT_URL = assetUrl(woff2);
+// Bundler-native asset URL (Vite / webpack 5 / Turbopack all emit the file and
+// rewrite this). Avoids a `*.woff2` module-type import, which consumers don't
+// declare (Next only types images), so it type-checks everywhere.
+const FONT_URL = new URL("./assets/d8-pixel.woff2", import.meta.url).href;
 let loaded = false;
 let loadPromise: Promise<void> | null = null;
 
