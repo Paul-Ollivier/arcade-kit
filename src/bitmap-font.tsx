@@ -16,8 +16,15 @@
 
 import type { CSSProperties } from "react";
 import { assetUrl } from "./asset-url";
+import { BASIC_GLYPH_METRICS } from "./bitmap-metrics";
 import asciiPng from "./assets/basicpixel_8x8.png";
 import outlinePng from "./assets/font-8x7-outline.png";
+
+// Proportional advance for the basic atlas: each glyph occupies its INK width
+// plus a 1px gap (matching the kit web font), instead of the full monospace
+// cell — so narrow glyphs (1 . i ! , ;) don't carry a big trailing gap.
+const ADVANCE_GAP = 1; // source-px gap added after each glyph
+const SPACE_WIDTH = 4; // source-px width of the blank space glyph (× spaceScale)
 
 // ── basicpixel_8x8.png — 80×80, a 10×10 grid of 8×8 cells, printable ASCII
 //    32–126 row-major from space.
@@ -66,6 +73,10 @@ type Atlas = {
   gh: number;
   /** Black-glyph sheet → draw via CSS mask + currentColor; full-colour → background image. */
   mask: boolean;
+  /** Trim each glyph to its ink width (+ a 1px gap) instead of the fixed cell,
+   *  via BASIC_GLYPH_METRICS. Only the basic body atlas; the outline title face
+   *  stays monospace (its edge-to-edge cells rely on the -1px overlap). */
+  proportional?: boolean;
 };
 
 function BitmapFace({ atlas, children, scale, unit, tracking = 0, spaceScale = 1, className, style }: FaceProps & { atlas: Atlas }) {
@@ -75,10 +86,16 @@ function BitmapFace({ atlas, children, scale, unit, tracking = 0, spaceScale = 1
   const rows = Math.max(1, Math.ceil(atlas.charset.length / atlas.cols));
   // source-px count → rendered CSS length: a vh-ish unit when given, else px.
   const len = (n: number) => (unit ? `calc(${unit} * ${n})` : `${n * scale}px`);
-  const gw = len(atlas.gw);
+  const gwFull = len(atlas.gw);
   const gh = len(atlas.gh);
   const sheetW = len(atlas.cols * atlas.gw);
   const sheetH = len(rows * atlas.gh);
+  const size = `${sheetW} ${sheetH}`;
+  const proportional = !!atlas.proportional;
+  // tracking as a CSS length fragment (number → px). Proportional advance bakes
+  // in a 1px gap on top of tracking; monospace uses tracking alone.
+  const track = typeof tracking === "number" ? `${tracking}px` : `${tracking}`;
+  const stepMargin = proportional ? `calc(${len(ADVANCE_GAP)} + ${track})` : track;
 
   return (
     <span
@@ -95,26 +112,31 @@ function BitmapFace({ atlas, children, scale, unit, tracking = 0, spaceScale = 1
     >
       {chars.map((ch, i) => {
         // marginRight (not flex `gap`) so callers can pass negative tracking to
-        // tighten the monospace cells — `gap` clamps negatives to 0.
-        const mr = i < chars.length - 1 ? tracking : 0;
+        // tighten — `gap` clamps negatives to 0. No trailing margin on the last.
+        const mr = i < chars.length - 1 ? stepMargin : 0;
         if (ch === " ") {
-          // Blank cell — render it narrower than a full glyph so word gaps
-          // don't read as oversized.
-          return <span key={i} aria-hidden style={{ display: "inline-block", width: len(atlas.gw * spaceScale), height: gh, marginRight: mr }} />;
+          // Blank cell — narrow so word gaps don't read as oversized.
+          const sw = proportional ? len(SPACE_WIDTH * spaceScale) : len(atlas.gw * spaceScale);
+          return <span key={i} aria-hidden style={{ display: "inline-block", width: sw, height: gh, marginRight: mr }} />;
         }
         const idx = atlas.charset.indexOf(ch);
         if (idx < 0) {
-          return <span key={i} aria-hidden style={{ display: "inline-block", width: gw, height: gh, marginRight: mr }} />;
+          return <span key={i} aria-hidden style={{ display: "inline-block", width: gwFull, height: gh, marginRight: mr }} />;
         }
         const c = idx % atlas.cols;
         const r = Math.floor(idx / atlas.cols);
-        const posX = len(-(c * atlas.gw));
+        // Proportional: trim to the glyph's ink — shift the mask left by inkLeft
+        // and size the cell to inkWidth so only the ink shows (no cell padding).
+        const m = proportional ? BASIC_GLYPH_METRICS[idx] : undefined;
+        const inkLeft = m ? m[0] : 0;
+        const inkW = m && m[1] > 0 ? m[1] : atlas.gw;
+        const cellW = proportional ? len(inkW) : gwFull;
+        const posX = len(-(c * atlas.gw + inkLeft));
         const posY = len(-(r * atlas.gh));
-        const size = `${sheetW} ${sheetH}`;
         const cell: CSSProperties = atlas.mask
           ? {
               display: "inline-block",
-              width: gw,
+              width: cellW,
               height: gh,
               marginRight: mr,
               backgroundColor: "currentColor",
@@ -130,7 +152,7 @@ function BitmapFace({ atlas, children, scale, unit, tracking = 0, spaceScale = 1
             }
           : {
               display: "inline-block",
-              width: gw,
+              width: cellW,
               height: gh,
               marginRight: mr,
               backgroundImage: `url("${atlas.src}")`,
@@ -145,7 +167,7 @@ function BitmapFace({ atlas, children, scale, unit, tracking = 0, spaceScale = 1
   );
 }
 
-const ASCII_ATLAS: Atlas = { src: ASCII_SRC, charset: ASCII_CHARSET, cols: ASCII_COLS, gw: ASCII_GW, gh: ASCII_GH, mask: true };
+const ASCII_ATLAS: Atlas = { src: ASCII_SRC, charset: ASCII_CHARSET, cols: ASCII_COLS, gw: ASCII_GW, gh: ASCII_GH, mask: true, proportional: true };
 const OUTLINE_ATLAS: Atlas = { src: OUTLINE_SRC, charset: OUTLINE_CHARSET, cols: OUTLINE_COLS, gw: OUTLINE_GW, gh: OUTLINE_GH, mask: false };
 
 /** General pixel-bitmap label — colour follows `color` (defaults to currentColor). */
