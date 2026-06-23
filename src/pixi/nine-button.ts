@@ -33,7 +33,7 @@ export const BUTTON_ASSET_ALIASES = {
   outlinePressed: "d8-arcade-btn-outline-pressed",
 } as const;
 
-const UNIT_LABEL_ADVANCE = 7; // basicpixel advance (px) — 1px tighter than the 8-px cell
+const UNIT_LABEL_ADVANCE = 8; // basicpixel cell width (px) — fixed-cell label font
 const DEFAULT_PIXEL = 3;      // rendered size of one source pixel (chunkiness)
 const DEFAULT_INK   = 0x1a1410; // near-black label ink on the bright face
 

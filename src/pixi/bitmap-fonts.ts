@@ -113,9 +113,6 @@ export function loadArcadeFonts(): Promise<unknown> {
       family: FONT_BASIC, textureKey: BASIC_URL,
       startCode: 0x20, charCount: 0x7e - 0x20 + 1,
       cellW: 8, cellH: 8, charsPerRow: 10,
-      // 7-px advance (1px tighter than the 8-px cell) — the atlas' rightmost
-      // column is padding, so glyphs just sit 1px closer.
-      xAdvanceFor: () => 7,
     });
     return res;
   });

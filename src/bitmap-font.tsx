@@ -64,10 +64,6 @@ type Atlas = {
   cols: number;
   gw: number;
   gh: number;
-  /** Per-glyph horizontal step in source px (the layout advance). Defaults to
-   *  `gw`; set smaller than `gw` to tighten letter-spacing (the glyph bitmap
-   *  still draws `gw` wide, clipped to this step). */
-  advance?: number;
   /** Black-glyph sheet → draw via CSS mask + currentColor; full-colour → background image. */
   mask: boolean;
 };
@@ -81,9 +77,6 @@ function BitmapFace({ atlas, children, scale, unit, tracking = 0, spaceScale = 1
   const len = (n: number) => (unit ? `calc(${unit} * ${n})` : `${n * scale}px`);
   const gw = len(atlas.gw);
   const gh = len(atlas.gh);
-  // Layout step per glyph — `advance` (≤ gw) tightens letter-spacing; the glyph
-  // bitmap still samples a full `gw`-wide cell, clipped to this width.
-  const cellW = len(atlas.advance ?? atlas.gw);
   const sheetW = len(atlas.cols * atlas.gw);
   const sheetH = len(rows * atlas.gh);
 
@@ -121,7 +114,7 @@ function BitmapFace({ atlas, children, scale, unit, tracking = 0, spaceScale = 1
         const cell: CSSProperties = atlas.mask
           ? {
               display: "inline-block",
-              width: cellW,
+              width: gw,
               height: gh,
               marginRight: mr,
               backgroundColor: "currentColor",
@@ -137,7 +130,7 @@ function BitmapFace({ atlas, children, scale, unit, tracking = 0, spaceScale = 1
             }
           : {
               display: "inline-block",
-              width: cellW,
+              width: gw,
               height: gh,
               marginRight: mr,
               backgroundImage: `url("${atlas.src}")`,
@@ -152,7 +145,7 @@ function BitmapFace({ atlas, children, scale, unit, tracking = 0, spaceScale = 1
   );
 }
 
-const ASCII_ATLAS: Atlas = { src: ASCII_SRC, charset: ASCII_CHARSET, cols: ASCII_COLS, gw: ASCII_GW, gh: ASCII_GH, advance: 7, mask: true };
+const ASCII_ATLAS: Atlas = { src: ASCII_SRC, charset: ASCII_CHARSET, cols: ASCII_COLS, gw: ASCII_GW, gh: ASCII_GH, mask: true };
 const OUTLINE_ATLAS: Atlas = { src: OUTLINE_SRC, charset: OUTLINE_CHARSET, cols: OUTLINE_COLS, gw: OUTLINE_GW, gh: OUTLINE_GH, mask: false };
 
 /** General pixel-bitmap label — colour follows `color` (defaults to currentColor). */
