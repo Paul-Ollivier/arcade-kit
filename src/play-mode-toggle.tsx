@@ -83,8 +83,14 @@ export function PlayModeToggle({
             // Lit side keeps the kit's near-black default label; idle side gets
             // a light label for contrast on slate.
             textColor={active ? undefined : inactiveTextColor}
+            // The selected side reads as the current state: held pushed-in and
+            // non-interactable (the player can only pick the OTHER side). It
+            // stays lit (not greyed) so it's clearly "on", just not clickable.
+            pressed={active}
             aria-pressed={active}
             disabled={disabled}
+            tabIndex={active && !disabled ? -1 : undefined}
+            style={active && !disabled ? { pointerEvents: "none" } : undefined}
             onClick={() => {
               if (!active) onSelect(id);
             }}

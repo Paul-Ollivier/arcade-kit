@@ -89,6 +89,9 @@ export interface NineSliceButtonProps extends ButtonHTMLAttributes<HTMLButtonEle
   pixelScale?: string;
   /** Px shorthand for pixelScale (pixelScale = `${scale}px`). */
   scale?: number;
+  /** Render permanently in the pressed/sunken state (e.g. a toggle's selected
+   *  side or a static banner) instead of only while `:active`. */
+  pressed?: boolean;
   /** Total button height. Defaults to the native 12-px height; larger values stretch the face. */
   height?: string;
   /** Rendered size of one label font-pixel (CSS length). Defaults to half a structural pixel. */
@@ -96,7 +99,7 @@ export interface NineSliceButtonProps extends ButtonHTMLAttributes<HTMLButtonEle
 }
 
 export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProps>(function NineSliceButton(
-  { color = DEFAULT_LIGHT, shadowColor, textColor = "#1a1410", pixelScale, scale = DEFAULT_SCALE, height, labelPixel, className, style, children, ...rest },
+  { color = DEFAULT_LIGHT, shadowColor, textColor = "#1a1410", pixelScale, scale = DEFAULT_SCALE, pressed, height, labelPixel, className, style, children, ...rest },
   ref,
 ) {
   const ps = pixelScale ?? `${scale}px`;
@@ -166,7 +169,7 @@ export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProp
   return (
     <button
       ref={ref}
-      className={`nine-btn font-mono${className ? ` ${className}` : ""}`}
+      className={`nine-btn font-mono${pressed ? " nine-btn--pressed" : ""}${className ? ` ${className}` : ""}`}
       style={{
         ...(cssVars as CSSProperties),
         position:       "relative",

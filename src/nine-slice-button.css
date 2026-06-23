@@ -16,6 +16,15 @@
   --fill-mask: var(--fill-rest);
 }
 .nine-btn:hover:not(:disabled) { filter: brightness(1.07); }
+/* Statically pressed (the `pressed` prop) — same operands as :active, no pointer
+   needed. Declared after the rest rule so it wins at equal specificity. */
+.nine-btn--pressed {
+  --slice-top: var(--slice-top-press);
+  --bevel-h:   var(--bevel-press);
+  --outline:   var(--outline-press);
+  --fill-mask: var(--fill-press);
+}
+.nine-btn--pressed .nine-btn__content { transform: translateY(calc(var(--u) * 2)); }
 /* Pressed: swap to the shifted-down sprites and grow the top inset / shrink the
    bottom inset to match. The cap sinks 2 px (a gap opens at the top, the bottom
    edge holds) and the lip thins 3 px → 1 px. The label sinks the same 2 px to
