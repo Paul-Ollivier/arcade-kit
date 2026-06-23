@@ -22,6 +22,8 @@ Two subpath entries (both resolve straight to source):
 - `NineSlicePanel` / `NineSlicePanelVariant` (`nine-slice-panel.tsx`) — has a `color` prop + cash-out green variant.
 - `NineSliceField` (`nine-slice-field.tsx` + `.css`).
 - `BitmapText`, `TitleText` (`bitmap-font.tsx`) — `BitmapText` uses `basicpixel_8x8.png` as a CSS mask (color inherits); `TitleText` uses `font-8x7-outline.png` as a background image (own palette, auto upper-cased).
+- **Typography system** (`typography.ts`) — `TYPE_SCALE` (named size scale) + `TypeRole` + `FONT_CELL`. See **Typography** below. The single source of truth for font roles + sizes, shared by the DOM, Pixi and canvas renderers.
+- `drawBitmapText` / `measureBitmapText` / `loadBitmapFontImage` (`canvas-text.ts`) — a canvas-2D renderer for the basic (body) pixel font, for surfaces that draw text straight onto a `<canvas>` (e.g. the hub's CRT attract/leaderboard screens) so they use the kit font instead of a web font.
 - `assetUrl` (`asset-url.ts`) — normalises a PNG import that's either a URL string (bare bundler) or a Next `StaticImageData` object.
 - `GOLDEN_COIN_URLS` (`coins.ts`) — the six-frame golden-coin spin as resolved URLs (source in `assets/golden-coin.aseprite`). One canonical gold coin for every game/hub; the Pixi adapter wraps it in a ready-to-load helper.
 - `CHAT_BUBBLE_URL` (`chat-bubble.ts`) / `GLOVE_POINTER_URL` (`glove.ts`) — resolved URLs for the hub's chat-tab icon and the cabinet's flanking pointing-glove nav arrow. Plain URL strings (for `<img src>` / `url(...)`), so the hub no longer carries its own `/public` copies.
@@ -31,6 +33,34 @@ Two subpath entries (both resolve straight to source):
 
 ### Pixi adapter (`src/pixi/index.ts`)
 - `NineButton` + `measureButtonLabel` + `BUTTON_ASSET_ALIASES` (`pixi/nine-button.ts`), `loadButtonAssets` + `loadCoinAssets` + `GOLDEN_COIN_ALIASES` (`pixi/load-assets.ts`), `loadArcadeFonts` / `registerGridBitmapFont` / `FONT_OUTLINE` / `FONT_BASIC` (`pixi/bitmap-fonts.ts`). Shares `button-geometry` with the DOM kit. `loadCoinAssets()` registers the six golden-coin frames under `GOLDEN_COIN_ALIASES` (read a frame with `Assets.get(GOLDEN_COIN_ALIASES[n])`).
+- `FONT_BODY` / `FONT_TITLE` (semantic aliases of `FONT_BASIC` / `FONT_OUTLINE`) + `makeBitmapText(text, role, { title?, color? })` (`pixi/bitmap-fonts.ts`) — builds a Pixi `BitmapText` at a `TYPE_SCALE` step using the right face. Re-exports `TYPE_SCALE` / `FONT_CELL` / `TypeRole`.
+
+## Typography
+
+ONE system, owned by the kit, used by the hub + every game. **Two faces, one scale:**
+
+- **Normal / body text → the flat basic font.** DOM `<BitmapText>`, Pixi `FONT_BODY`, canvas `drawBitmapText`. The default for labels, values, buttons, paragraphs, nameplates, HUD readouts. The `basicpixel_8x8.png` atlas is **white**, so it tints to any colour (Pixi/canvas `fill`/tint; DOM inherits `color`) — light text on dark, dark on light.
+- **Big titles / display → the bevelled outline font.** DOM `<TitleText>`, Pixi `FONT_TITLE`. Reserved for hero moments (logo, GAME OVER, big win multiplier, status banners). Not for ordinary text.
+
+**Sizes** come from `TYPE_SCALE` (in `typography.ts`), never ad-hoc numbers. Each value is the per-source-pixel multiplier — the DOM `scale` prop and the Pixi `.scale.set()` factor — so a role is the SAME step in DOM and Pixi (body cell is 8px → height ≈ `step × 8px`):
+
+| role | step | ≈px (body) | use |
+|------|------|-----|-----|
+| `caption` | 1 | 8 | fine print, dense metadata |
+| `body` | 2 | 16 | **default** |
+| `heading` | 3 | 24 | sub-headings, prize amount |
+| `title` | 4 | 32 | section / panel titles |
+| `display` | 6 | 48 | status banners, big callouts |
+| `hero` | 8 | 64 | logo, GAME OVER, countdown, jackpot |
+
+```tsx
+<BitmapText scale={TYPE_SCALE.body}>JOIN</BitmapText>        // DOM, flat body font
+<TitleText scale={TYPE_SCALE.hero}>DOMIN8</TitleText>       // DOM, bevel title font
+makeBitmapText("3", "display", { color: 0xffe27a })          // Pixi, flat body font
+drawBitmapText(ctx, "INSERT COIN", x, y, { role: "body", color: "#f5c518", align: "center" }) // canvas
+```
+
+**Recolour note:** `basicpixel_8x8.png` is white (was black). DOM `BitmapText` is unaffected (CSS mask uses alpha only), but **every Pixi `FONT_BASIC` consumer must set an explicit `fill`/`tint`** — untinted now renders white instead of black.
 
 ## How consumers depend on it (git tag, NOT npm)
 
@@ -40,7 +70,7 @@ It's a **public git dependency** — no token/SSH needed. Consumers pin a **tag*
 "@domin8/arcade-kit": "github:Paul-Ollivier/arcade-kit#v1.9.0"
 ```
 
-Bun resolves the `#fragment` as a git ref, **not** an npm semver range — `#semver:^1.0.0` does NOT work. Current published tag: **v1.12.0** (added `GLOVE_POINTER_URL`; v1.11.0 added the shared golden coin). Tags follow semver intent (breaking visual/API change → major). Hub is on v1.12.0 (uses the shared coin sprites' siblings — glove); RR is on v1.11.0 (shared coin); flip/arena lag (v1.7.0/v1.9.0).
+Bun resolves the `#fragment` as a git ref, **not** an npm semver range — `#semver:^1.0.0` does NOT work. Current published tag: **v1.13.0** (formalized the shared **typography** system — `TYPE_SCALE`, `FONT_BODY`/`FONT_TITLE`, `makeBitmapText`, canvas `drawBitmapText`, and recoloured the basic atlas white so it's tintable in Pixi; v1.12.0 added `GLOVE_POINTER_URL`; v1.11.0 the shared golden coin). Tags follow semver intent (breaking visual/API change → major). After the v1.13.0 rollout the hub + all games pin v1.13.0.
 
 **Release flow:** bump `version` in `package.json`, commit, `git tag vX.Y.Z`, push tag, then bump the `#vX.Y.Z` ref in each downstream repo's `package.json` deliberately. Downstream upgrades are opt-in — nothing auto-updates.
 

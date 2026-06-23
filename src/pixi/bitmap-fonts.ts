@@ -1,5 +1,6 @@
-import { Assets, BitmapFont, Cache, Texture } from "pixi.js";
+import { Assets, BitmapFont, BitmapText, Cache, Texture } from "pixi.js";
 import { assetUrl } from "../asset-url";
+import { TYPE_SCALE, FONT_CELL, type TypeRole } from "../typography";
 import outlinePng from "../assets/font-8x7-outline.png";
 import basicPng from "../assets/basicpixel_8x8.png";
 
@@ -18,8 +19,16 @@ import basicPng from "../assets/basicpixel_8x8.png";
  *  symbols, 3-D extrude. The Pixi twin of `TitleText`. */
 export const FONT_OUTLINE = "d8-outline";
 /** General pixel face (basicpixel_8x8.png) — full printable ASCII. The Pixi twin
- *  of `BitmapText`. */
+ *  of `BitmapText`. The atlas is white, so a BitmapText `fill`/`tint` recolours
+ *  it to any colour. */
 export const FONT_BASIC = "d8-basic";
+
+// Semantic role aliases (see ../typography.ts). Prefer these in game code so the
+// font's ROLE (body vs title) is explicit at the call site.
+/** Normal / body text — the flat basic font. */
+export const FONT_BODY = FONT_BASIC;
+/** Big titles / display — the bevelled outline font. */
+export const FONT_TITLE = FONT_OUTLINE;
 
 const OUTLINE_URL = assetUrl(outlinePng);
 const BASIC_URL = assetUrl(basicPng);
@@ -108,4 +117,45 @@ export function loadArcadeFonts(): Promise<unknown> {
     return res;
   });
   return loadPromise;
+}
+
+export interface MakeBitmapTextOptions {
+  /** Use the bevelled TITLE face (FONT_TITLE) instead of the body face. */
+  title?: boolean;
+  /** Tint colour (0xRRGGBB). The atlas is white, so this is the rendered colour.
+   *  Defaults to white. */
+  color?: number;
+  /** Extra pixels between glyphs (source px, pre-scale). */
+  letterSpacing?: number;
+}
+
+/**
+ * Build a Pixi `BitmapText` at a named type-scale step, using the kit's shared
+ * fonts and the typography convention (body vs title face). Sets a crisp native
+ * base `fontSize` (the face's cell height) then `.scale.set(TYPE_SCALE[role])`,
+ * so the same role is the same step in DOM and Pixi.
+ *
+ *   const t = makeBitmapText("READY", "display", { color: 0xffe27a });
+ *   const big = makeBitmapText("WINNER", "hero", { title: true });
+ *
+ * `loadArcadeFonts()` must have resolved first.
+ */
+export function makeBitmapText(
+  text: string | number,
+  role: TypeRole = "body",
+  opts: MakeBitmapTextOptions = {}
+): BitmapText {
+  const title = opts.title ?? false;
+  const t = new BitmapText({
+    // The outline face is caps-only — match TitleText's auto-uppercasing.
+    text: title ? String(text).toUpperCase() : String(text),
+    style: {
+      fontFamily: title ? FONT_TITLE : FONT_BODY,
+      fontSize: title ? FONT_CELL.title : FONT_CELL.body,
+      fill: opts.color ?? 0xffffff,
+      letterSpacing: opts.letterSpacing ?? 0,
+    },
+  });
+  t.scale.set(TYPE_SCALE[role]);
+  return t;
 }
