@@ -20,6 +20,9 @@ import basicPng from "./assets/basicpixel_8x8.png";
 const BASIC_URL = assetUrl(basicPng);
 const COLS = 10;
 const CELL = 8;
+// Pen advance per glyph (1px tighter than the 8-px cell — the atlas' rightmost
+// column is padding). Glyphs are still drawn CELL (8) wide.
+const ADVANCE = 7;
 const FIRST = 0x20;
 const LAST = 0x7e;
 
@@ -81,7 +84,7 @@ export function measureBitmapText(text: string, opts: DrawBitmapTextOptions = {}
   const scale = opts.scale ?? TYPE_SCALE[opts.role ?? "body"];
   const ls = opts.letterSpacing ?? 0;
   const n = [...text].length;
-  return n > 0 ? (n * (CELL + ls) - ls) * scale : 0;
+  return n > 0 ? (n * (ADVANCE + ls) - ls) * scale : 0;
 }
 
 /**
@@ -108,7 +111,7 @@ export function drawBitmapText(
 
   const prevSmoothing = ctx.imageSmoothingEnabled;
   ctx.imageSmoothingEnabled = false;
-  const adv = (CELL + ls) * scale;
+  const adv = (ADVANCE + ls) * scale;
   chars.forEach((ch, i) => {
     const code = ch.codePointAt(0) ?? 0;
     if (code < FIRST || code > LAST) return; // space / unknown → blank cell
