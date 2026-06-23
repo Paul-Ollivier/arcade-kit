@@ -6,9 +6,9 @@ import outlinePng from "../assets/font-8x7-outline.png";
 import basicPng from "../assets/basicpixel_8x8.png";
 
 // Proportional advance for the basic body face — mirrors the DOM BitmapText so
-// Pixi text spacing matches the panels: glyph advance = ink width + 1px gap;
+// Pixi text spacing matches the panels: glyph advance = ink width + a gap;
 // the blank space advances 4px.
-const BASIC_ADVANCE_GAP = 1;
+const BASIC_ADVANCE_GAP = 2;
 const BASIC_SPACE_ADVANCE = 4;
 
 /**

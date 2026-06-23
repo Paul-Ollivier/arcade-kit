@@ -21,9 +21,9 @@ import asciiPng from "./assets/basicpixel_8x8.png";
 import outlinePng from "./assets/font-8x7-outline.png";
 
 // Proportional advance for the basic atlas: each glyph occupies its INK width
-// plus a 1px gap (matching the kit web font), instead of the full monospace
-// cell — so narrow glyphs (1 . i ! , ;) don't carry a big trailing gap.
-const ADVANCE_GAP = 1; // source-px gap added after each glyph
+// plus a gap, instead of the full monospace cell — so narrow glyphs
+// (1 . i ! , ;) don't carry a big trailing gap.
+const ADVANCE_GAP = 2; // source-px gap added after each glyph
 const SPACE_WIDTH = 4; // source-px width of the blank space glyph (× spaceScale)
 
 // ── basicpixel_8x8.png — 80×80, a 10×10 grid of 8×8 cells, printable ASCII
