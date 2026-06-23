@@ -9,7 +9,10 @@
 //   // then anywhere in CSS:
 //   style={{ fontFamily: PIXEL_FONT_FAMILY }}    // or point --font-pixel at it
 //
-// Monospace, 8px cell → crispest at font sizes that are multiples of 8px.
+// PROPORTIONAL / optically spaced (each glyph's advance = its ink width + a 1px
+// gap) so prose kerns naturally — unlike the monospace BitmapText atlas, which
+// stays fixed-cell for short labels. Crispest at font sizes that are multiples
+// of 8px.
 
 import { PIXEL_FONT_DATA_URL } from "./pixel-font-data";
 
