@@ -6,3 +6,13 @@ declare module "*.png" {
   const value: string | { src: string };
   export default value;
 }
+
+declare module "*.woff2" {
+  const value: string | { src: string };
+  export default value;
+}
+
+declare module "*.ttf" {
+  const value: string | { src: string };
+  export default value;
+}

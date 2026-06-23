@@ -12,6 +12,10 @@ export type { TypeRole } from "./typography";
 // text straight onto a <canvas> (e.g. the hub's CRT screens).
 export { drawBitmapText, measureBitmapText, loadBitmapFontImage } from "./canvas-text";
 export type { DrawBitmapTextOptions } from "./canvas-text";
+// The kit pixel face as a WEB FONT — for CSS-styled DOM text (matches the
+// BitmapText face). Call loadPixelWebFont() once on the client; use
+// PIXEL_FONT_FAMILY in `font-family`.
+export { loadPixelWebFont, PIXEL_FONT_FAMILY } from "./web-font";
 export { assetUrl } from "./asset-url";
 export { CHAT_BUBBLE_URL } from "./chat-bubble";
 export { GLOVE_POINTER_URL } from "./glove";
