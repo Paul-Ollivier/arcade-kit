@@ -1,8 +1,15 @@
 import { Assets, BitmapFont, BitmapText, Cache, Texture } from "pixi.js";
 import { assetUrl } from "../asset-url";
 import { TYPE_SCALE, FONT_CELL, type TypeRole } from "../typography";
+import { BASIC_GLYPH_METRICS } from "../bitmap-metrics";
 import outlinePng from "../assets/font-8x7-outline.png";
 import basicPng from "../assets/basicpixel_8x8.png";
+
+// Proportional advance for the basic body face — mirrors the DOM BitmapText so
+// Pixi text spacing matches the panels: glyph advance = ink width + 1px gap;
+// the blank space advances 4px.
+const BASIC_ADVANCE_GAP = 1;
+const BASIC_SPACE_ADVANCE = 4;
 
 /**
  * Pixi BitmapFonts for the kit's two bundled grid atlases, so games can render
@@ -56,6 +63,10 @@ export interface GridBitmapFontSpec {
   charsPerRow: number;
   /** Per-character xAdvance override (defaults to cellW). */
   xAdvanceFor?: (ch: string) => number;
+  /** Per-glyph [inkLeft, inkWidth] (source px), indexed by glyph order. When set,
+   *  each glyph is cropped to its ink and advances by inkWidth + 1 (space by 4) —
+   *  i.e. proportional spacing, matching the DOM BitmapText. */
+  glyphMetrics?: ReadonlyArray<readonly [number, number]>;
 }
 
 /** Register a uniform-grid spritesheet image as a Pixi BitmapFont. Idempotent
@@ -72,11 +83,27 @@ export function registerGridBitmapFont(spec: GridBitmapFontSpec): void {
     const ch = String.fromCharCode(code);
     const col = i % spec.charsPerRow;
     const row = Math.floor(i / spec.charsPerRow);
+    // Proportional: crop the glyph to its ink and advance by ink width + gap.
+    // Without metrics it stays monospace (full cell, advance = cellW).
+    let gx = col * spec.cellW;
+    let gw = spec.cellW;
+    let adv = spec.cellW;
+    const m = spec.glyphMetrics?.[i];
+    if (m) {
+      const [inkLeft, inkWidth] = m;
+      if (inkWidth > 0) {
+        gx = col * spec.cellW + inkLeft;
+        gw = inkWidth;
+        adv = inkWidth + BASIC_ADVANCE_GAP;
+      } else {
+        adv = BASIC_SPACE_ADVANCE; // no ink (space) — keep the transparent cell, advance less
+      }
+    }
     chars[ch] = {
       id: code, page: 0,
-      x: col * spec.cellW, y: row * spec.cellH, width: spec.cellW, height: spec.cellH,
+      x: gx, y: row * spec.cellH, width: gw, height: spec.cellH,
       xOffset: 0, yOffset: 0,
-      xAdvance: spec.xAdvanceFor ? spec.xAdvanceFor(ch) : spec.cellW,
+      xAdvance: spec.xAdvanceFor ? spec.xAdvanceFor(ch) : adv,
       letter: ch, kerning: {},
     };
   }
@@ -113,6 +140,7 @@ export function loadArcadeFonts(): Promise<unknown> {
       family: FONT_BASIC, textureKey: BASIC_URL,
       startCode: 0x20, charCount: 0x7e - 0x20 + 1,
       cellW: 8, cellH: 8, charsPerRow: 10,
+      glyphMetrics: BASIC_GLYPH_METRICS,
     });
     return res;
   });
