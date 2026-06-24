@@ -18,6 +18,7 @@ export type { DrawBitmapTextOptions } from "./canvas-text";
 export { loadPixelWebFont, PIXEL_FONT_FAMILY } from "./web-font";
 export { assetUrl } from "./asset-url";
 export { CHAT_BUBBLE_URL } from "./chat-bubble";
+export { DITHERED_GRADIENT_URL, DITHERED_GRADIENT_32_URL } from "./dither";
 export { GLOVE_POINTER_URL } from "./glove";
 export { GOLDEN_COIN_URLS } from "./coins";
 export { isCabinet, isFreePlay, postGameOver, postExit, postPlayForReal } from "./cabinet";
