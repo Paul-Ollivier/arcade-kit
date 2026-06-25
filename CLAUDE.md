@@ -17,6 +17,7 @@ Two subpath entries (both resolve straight to source):
 
 - **`@domin8/arcade-kit`** → `src/index.ts` — DOM/React kit.
 - **`@domin8/arcade-kit/pixi`** → `src/pixi/index.ts` — Pixi adapter. Pulls in `pixi.js` (an *optional* peer dep), so DOM-only consumers that import only the root never load Pixi.
+- **`@domin8/arcade-kit/game`** → `src/game.ts` — shared **game art** (NOT UI chrome): fighter spritesheets (`CHARACTER_ATLASES`), VFX atlases (`FIGHT_EFFECT_ATLAS`, `BLOOD_ATLAS`) and props (`THRONE_URL`) for the Pixi brawlers (arena; flip when un-deferred). On a separate subpath so DOM-only root consumers don't pull in game sprites. Each spritesheet is `{ texture: <png url>, atlas: <parsed Aseprite json> }` — feed both into your Pixi loader (atlas is `unknown`; cast at the call site). Assets live in `src/assets/game/`. Needs `resolveJsonModule` (set in tsconfig).
 
 ### DOM kit (`src/index.ts`)
 - `NineSliceButton` (`nine-slice-button.tsx` + `.css`) — imports its own interaction CSS, no global stylesheet needed.
