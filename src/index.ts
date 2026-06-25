@@ -21,6 +21,7 @@ export { CHAT_BUBBLE_URL } from "./chat-bubble";
 export { DITHERED_GRADIENT_URL, DITHERED_GRADIENT_32_URL } from "./dither";
 export { GLOVE_POINTER_URL } from "./glove";
 export { GOLDEN_COIN_URLS } from "./coins";
+export { VAULT_BIG_URL, VAULT_TITLE_URL } from "./vault";
 export { isCabinet, isFreePlay, postGameOver, postExit, postPlayForReal } from "./cabinet";
 export type { GameResult } from "./cabinet";
 export { PlayForRealButton } from "./play-for-real-button";

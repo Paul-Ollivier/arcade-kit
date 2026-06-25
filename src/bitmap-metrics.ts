@@ -1,4 +1,4 @@
-// AUTO-GENERATED from assets/basicpixel_8x8.png -- per-glyph ink metrics for
+// AUTO-GENERATED from assets/d8-font-basic-8x8.png -- per-glyph ink metrics for
 // proportional BitmapText. Each entry is [inkLeft, inkWidth] in SOURCE px,
 // indexed by position in the ASCII charset (0 = space). Regenerate if the
 // atlas art changes. inkWidth 0 = no ink (space).

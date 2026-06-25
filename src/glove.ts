@@ -1,5 +1,5 @@
 import { assetUrl } from "./asset-url";
-import glovePng from "./assets/pixel-glove_hand-pointing_finger.png";
+import glovePng from "./assets/d8-glove-pointer.png";
 
 /** Resolved URL for the pointing-glove sprite (15×20 native, finger points UP) —
  *  the toon hand that flanks the hub's arcade cabinet as carousel nav arrows.

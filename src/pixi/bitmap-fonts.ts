@@ -2,8 +2,8 @@ import { Assets, BitmapFont, BitmapText, Cache, Texture } from "pixi.js";
 import { assetUrl } from "../asset-url";
 import { TYPE_SCALE, FONT_CELL, type TypeRole } from "../typography";
 import { BASIC_GLYPH_METRICS } from "../bitmap-metrics";
-import outlinePng from "../assets/font-8x7-outline.png";
-import basicPng from "../assets/basicpixel_8x8.png";
+import outlinePng from "../assets/d8-font-8x7-outline.png";
+import basicPng from "../assets/d8-font-basic-8x8.png";
 
 // Proportional advance for the basic body face — mirrors the DOM BitmapText so
 // Pixi text spacing matches the panels: glyph advance = ink width + a gap;
@@ -25,7 +25,7 @@ const BASIC_SPACE_ADVANCE = 4;
 /** Chunky outlined display face (font-8x7-outline.png) — caps + digits + a few
  *  symbols, 3-D extrude. The Pixi twin of `TitleText`. */
 export const FONT_OUTLINE = "d8-outline";
-/** General pixel face (basicpixel_8x8.png) — full printable ASCII. The Pixi twin
+/** General pixel face (d8-font-basic-8x8.png) — full printable ASCII. The Pixi twin
  *  of `BitmapText`. The atlas is white, so a BitmapText `fill`/`tint` recolours
  *  it to any colour. */
 export const FONT_BASIC = "d8-basic";

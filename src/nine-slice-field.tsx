@@ -2,7 +2,7 @@
 
 import { type InputHTMLAttributes, forwardRef } from "react";
 import { assetUrl } from "./asset-url";
-import fillPng from "./assets/button-fill.png";
+import fillPng from "./assets/d8-button-fill.png";
 import "./nine-slice-field.css";
 
 /**

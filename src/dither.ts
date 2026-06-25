@@ -1,6 +1,6 @@
 import { assetUrl } from "./asset-url";
-import ditherGradient64Png from "./assets/dithered_gradient_64x.png";
-import ditherGradient32Png from "./assets/dithered_gradient_32x.png";
+import ditherGradient64Png from "./assets/d8-dithered-gradient-64x.png";
+import ditherGradient32Png from "./assets/d8-dithered-gradient-32x.png";
 
 /**
  * Resolved URLs for the ordered-dither gradient textures (64× and 32× grain).

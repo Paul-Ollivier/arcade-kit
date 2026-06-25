@@ -1,5 +1,5 @@
 // The kit pixel face as a real WEB FONT (vector TTF/WOFF2), generated from the
-// SAME `basicpixel_8x8` atlas as the body `BitmapText`. This lets CSS-styled DOM
+// SAME `d8-font-basic-8x8` atlas as the body `BitmapText`. This lets CSS-styled DOM
 // text (and wrapping prose like chat) use the kit pixel face via a normal CSS
 // `font-family` — so it matches the BitmapText / Pixi / canvas rendering instead
 // of a different web font (e.g. "Press Start 2P").

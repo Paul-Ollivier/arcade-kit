@@ -3,7 +3,7 @@
 //   <BitmapText scale={2}>PLAY NOW</BitmapText>      // general pixel label
 //   <TitleText scale={7}>DOMIN8</TitleText>          // chunky outlined display
 //
-// BitmapText uses `basicpixel_8x8.png` — a pure-black glyph sheet, drawn as a
+// BitmapText uses `d8-font-basic-8x8.png` — a pure-black glyph sheet, drawn as a
 // CSS mask so its colour comes from `color` (inherits like normal text). Full
 // printable ASCII, so it handles any short label.
 //
@@ -17,8 +17,8 @@
 import type { CSSProperties } from "react";
 import { assetUrl } from "./asset-url";
 import { BASIC_GLYPH_METRICS } from "./bitmap-metrics";
-import asciiPng from "./assets/basicpixel_8x8.png";
-import outlinePng from "./assets/font-8x7-outline.png";
+import asciiPng from "./assets/d8-font-basic-8x8.png";
+import outlinePng from "./assets/d8-font-8x7-outline.png";
 
 // Proportional advance for the basic atlas: each glyph occupies its INK width
 // plus a gap, instead of the full monospace cell — so narrow glyphs
@@ -26,7 +26,7 @@ import outlinePng from "./assets/font-8x7-outline.png";
 const ADVANCE_GAP = 2; // source-px gap added after each glyph
 const SPACE_WIDTH = 4; // source-px width of the blank space glyph (× spaceScale)
 
-// ── basicpixel_8x8.png — 80×80, a 10×10 grid of 8×8 cells, printable ASCII
+// ── d8-font-basic-8x8.png — 80×80, a 10×10 grid of 8×8 cells, printable ASCII
 //    32–126 row-major from space.
 const ASCII_SRC = assetUrl(asciiPng);
 const ASCII_CHARSET =

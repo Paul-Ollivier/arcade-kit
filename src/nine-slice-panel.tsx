@@ -2,9 +2,9 @@
 
 import { type CSSProperties, type HTMLAttributes, forwardRef, useEffect, useState } from "react";
 import { assetUrl } from "./asset-url";
-import panelPng from "./assets/panel-bg.png";
-import panelCashoutPng from "./assets/panel-cashout-bg.png";
-import panelShadePng from "./assets/panel-shade.png";
+import panelPng from "./assets/d8-panel-bg.png";
+import panelCashoutPng from "./assets/d8-panel-cashout-bg.png";
+import panelShadePng from "./assets/d8-panel-shade.png";
 
 /**
  * D8 standard panel — a 9-slice pixel-art surface, the sibling of NineSliceButton

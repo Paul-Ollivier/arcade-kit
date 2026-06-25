@@ -8,6 +8,7 @@ The package **ships TS/TSX source** (no build step) and **imports its PNGs as mo
 
 - **Bun** (`bun.lock` present). Only script is `bun run typecheck` (`tsc --noEmit`) — run before tagging a release.
 - Source lives entirely in `src/`. `package.json` `files: ["src"]` ships it raw; there's no dist/build.
+- **Asset naming (convention across all Domin8 repos):** first-party brand/UI/shared sprites are `d8-<name>.png`, **lowercase kebab-case, no spaces/caps/underscores** (`d8-button-fill.png`, `d8-panel-bg.png`, `d8-font-basic-8x8.png`, `d8-glove-pointer.png`, `d8-vault-big.png`). Third-party packs/fonts keep their upstream names (just de-spaced/lowercased). Assets are imported as modules and re-exported as URL constants from `index.ts` — rename the file + its single import line together.
 - `tsconfig.json`: strict, `moduleResolution: "Bundler"`, `jsx: react-jsx`, `noEmit`.
 
 ## Exports
@@ -26,7 +27,8 @@ Two subpath entries (both resolve straight to source):
 - `drawBitmapText` / `measureBitmapText` / `loadBitmapFontImage` (`canvas-text.ts`) — a canvas-2D renderer for the basic (body) pixel font, for surfaces that draw text straight onto a `<canvas>` (e.g. the hub's CRT attract/leaderboard screens) so they use the kit font instead of a web font.
 - `loadPixelWebFont` / `PIXEL_FONT_FAMILY` (`web-font.ts`) — the kit pixel face as a real **web font** (`assets/d8-pixel.woff2`, generated from the same `basicpixel_8x8` atlas). Lets CSS-styled DOM text + wrapping prose use the kit pixel face via a normal `font-family`, matching `BitmapText`. Call `loadPixelWebFont()` once on the client; set `font-family: PIXEL_FONT_FAMILY` (`"D8 Pixel"`) or point a `--font-pixel` CSS var at it. Monospace 8px cell — crispest at font sizes that are multiples of 8px.
 - `assetUrl` (`asset-url.ts`) — normalises a PNG import that's either a URL string (bare bundler) or a Next `StaticImageData` object.
-- `GOLDEN_COIN_URLS` (`coins.ts`) — the six-frame golden-coin spin as resolved URLs (source in `assets/golden-coin.aseprite`). One canonical gold coin for every game/hub; the Pixi adapter wraps it in a ready-to-load helper.
+- `GOLDEN_COIN_URLS` (`coins.ts`) — the six-frame golden-coin spin as resolved URLs (source in `assets/d8-golden-coin.aseprite`). One canonical gold coin for every game/hub; the Pixi adapter wraps it in a ready-to-load helper.
+- `VAULT_BIG_URL` / `VAULT_TITLE_URL` (`vault.ts`) — the steel vault-door sprite (116×114) + the gold "VAULT" wordmark (54×15) for THE VAULT jackpot UI (hub's `piggy-bank-counter`). Plain URL strings; render `image-rendering: pixelated`.
 - `CHAT_BUBBLE_URL` (`chat-bubble.ts`) / `GLOVE_POINTER_URL` (`glove.ts`) — resolved URLs for the hub's chat-tab icon and the cabinet's flanking pointing-glove nav arrow. Plain URL strings (for `<img src>` / `url(...)`), so the hub no longer carries its own `/public` copies.
 - Cabinet bridge (`cabinet.ts`): `isCabinet`, `isFreePlay`, `postGameOver`, `postExit`, `postPlayForReal`, type `GameResult`. The other end is the hub (`GAME_ORIGINS` whitelist).
 - `PlayForRealButton` (`play-for-real-button.tsx`), `PlayModeToggle` + `PlayMode` (`play-mode-toggle.tsx`).
