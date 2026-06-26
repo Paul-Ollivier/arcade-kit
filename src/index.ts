@@ -1,5 +1,7 @@
 export { NineSliceButton } from "./nine-slice-button";
 export type { NineSliceButtonProps } from "./nine-slice-button";
+export { CloseButton } from "./close-button";
+export type { CloseButtonProps } from "./close-button";
 export { NineSlicePanel } from "./nine-slice-panel";
 export type { NineSlicePanelProps, NineSlicePanelVariant } from "./nine-slice-panel";
 export { NineSliceField } from "./nine-slice-field";
