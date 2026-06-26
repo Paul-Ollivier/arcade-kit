@@ -16,6 +16,11 @@ import fillPressedPng from "./assets/d8-button-fill-pressed.png";
  * a face→bevel two-tone) and a black/white OUTLINE frame. The pressed twins
  * shift the cap DOWN by SINK px (a gap opens at the top, the bottom edge holds)
  * and thin the bevel lip, so the button reads as sunk into its socket.
+ *
+ * The OUTLINE sprite's inner white HIGHLIGHT pixels are baked at 65% alpha
+ * (≈166/255) so the gloss reads softer on every button, across both the DOM and
+ * Pixi renderers (they share these PNGs). The black frame stays fully opaque.
+ * To retune, rebake from the git history's full-alpha original.
  */
 
 // Native-px geometry of the source art (one source pixel; renderers scale it).
