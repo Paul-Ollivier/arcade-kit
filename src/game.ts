@@ -36,6 +36,16 @@ import bloodJson from "./assets/game/blood-spritesheet.json";
 
 import thronePng from "./assets/game/throne.png";
 
+// Fighter HP bar — a 12×6 pixel-art capsule (black outline, 2-tone shaded fill,
+// rounded transparent end caps) used as a horizontal 3-slice over each fighter
+// during the arena brawl. Four colour variants share one shape: green/orange/red
+// for the draining fill (by HP fraction) and a dark `empty` track behind it.
+// Deliberately tiny so it stays crisp under nearest-neighbour integer scaling.
+import hpBarGreenPng from "./assets/hp-bar.png";
+import hpBarOrangePng from "./assets/hp-bar-orange.png";
+import hpBarRedPng from "./assets/hp-bar-red.png";
+import hpBarEmptyPng from "./assets/hp-bar-empty.png";
+
 /** A spritesheet asset: the texture URL + its parsed Aseprite atlas. `atlas` is
  *  left as `unknown` so the kit stays decoupled from any one engine's atlas type
  *  — cast it to your loader's shape at the call site. */
@@ -69,3 +79,19 @@ export const BLOOD_ATLAS: AtlasAsset = atlas(bloodPng, bloodJson);
 
 /** Winner-pose throne prop (single texture, no atlas). */
 export const THRONE_URL = assetUrl(thronePng);
+
+/** Fighter HP-bar capsule, by state. `green`/`orange`/`red` are the draining
+ *  fill (pick by HP fraction); `empty` is the dark track rendered behind it.
+ *  Render each as a horizontal nine-slice (see `HP_BAR_SLICE`) with a
+ *  nearest-neighbour, integer-scaled texture to keep the pixels crisp. */
+export const HP_BAR_URLS = {
+  green: assetUrl(hpBarGreenPng),
+  orange: assetUrl(hpBarOrangePng),
+  red: assetUrl(hpBarRedPng),
+  empty: assetUrl(hpBarEmptyPng),
+} as const;
+
+/** Nine-slice geometry for {@link HP_BAR_URLS}, in source pixels: the texture is
+ *  `width`×`height`, with `cap`-wide rounded end caps held fixed while the middle
+ *  column stretches. No vertical slicing (the height is scaled as a whole). */
+export const HP_BAR_SLICE = { width: 12, height: 6, cap: 3 } as const;
