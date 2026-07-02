@@ -83,7 +83,9 @@ export interface NineSliceButtonProps extends ButtonHTMLAttributes<HTMLButtonEle
   color?: string;
   /** Darker bevel / shadow color (tints the Dark Fill). Defaults to a darkened `color`. */
   shadowColor?: string;
-  /** Label color. Defaults to a near-black for contrast on the bright face. */
+  /** Label color. Defaults to an 85%-opaque near-black — full black read too
+   *  harsh against the bright face; the slight translucency lets the face tint
+   *  through and softens the label everywhere. */
   textColor?: string;
   /** Rendered size of one source pixel, as any CSS length (e.g. "0.4vh", "4px"). Overrides `scale`. */
   pixelScale?: string;
@@ -99,7 +101,7 @@ export interface NineSliceButtonProps extends ButtonHTMLAttributes<HTMLButtonEle
 }
 
 export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProps>(function NineSliceButton(
-  { color = DEFAULT_LIGHT, shadowColor, textColor = "#1a1410", pixelScale, scale = DEFAULT_SCALE, pressed, height, labelPixel, className, style, children, ...rest },
+  { color = DEFAULT_LIGHT, shadowColor, textColor = "rgba(26,20,16,0.85)", pixelScale, scale = DEFAULT_SCALE, pressed, height, labelPixel, className, style, children, ...rest },
   ref,
 ) {
   const ps = pixelScale ?? `${scale}px`;
