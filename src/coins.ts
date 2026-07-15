@@ -1,10 +1,10 @@
 import { assetUrl } from "./asset-url";
-import frame1 from "./assets/d8-golden-coin-0001.png";
-import frame2 from "./assets/d8-golden-coin-0002.png";
-import frame3 from "./assets/d8-golden-coin-0003.png";
-import frame4 from "./assets/d8-golden-coin-0004.png";
-import frame5 from "./assets/d8-golden-coin-0005.png";
-import frame6 from "./assets/d8-golden-coin-0006.png";
+import frame1 from "./assets/sprites/d8-golden-coin-0001.png";
+import frame2 from "./assets/sprites/d8-golden-coin-0002.png";
+import frame3 from "./assets/sprites/d8-golden-coin-0003.png";
+import frame4 from "./assets/sprites/d8-golden-coin-0004.png";
+import frame5 from "./assets/sprites/d8-golden-coin-0005.png";
+import frame6 from "./assets/sprites/d8-golden-coin-0006.png";
 
 /**
  * The six-frame golden-coin spin (native pixel art, source in

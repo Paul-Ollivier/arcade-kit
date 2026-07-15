@@ -1,7 +1,7 @@
 import { assetUrl } from "./asset-url";
-import vaultBigPng from "./assets/d8-vault-big.png";
-import vaultSmallPng from "./assets/d8-vault-small.png";
-import vaultTitlePng from "./assets/d8-vault-title.png";
+import vaultBigPng from "./assets/sprites/d8-vault-big.png";
+import vaultSmallPng from "./assets/sprites/d8-vault-small.png";
+import vaultTitlePng from "./assets/sprites/d8-vault-title.png";
 
 /** Resolved URL for the big steel vault-door sprite (116×114 native, with the
  *  CLOSED plate) — the hero image for THE VAULT info-modal. Render with

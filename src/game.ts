@@ -41,10 +41,10 @@ import thronePng from "./assets/game/throne.png";
 // during the arena brawl. Four colour variants share one shape: green/orange/red
 // for the draining fill (by HP fraction) and a dark `empty` track behind it.
 // Deliberately tiny so it stays crisp under nearest-neighbour integer scaling.
-import hpBarGreenPng from "./assets/hp-bar.png";
-import hpBarOrangePng from "./assets/hp-bar-orange.png";
-import hpBarRedPng from "./assets/hp-bar-red.png";
-import hpBarEmptyPng from "./assets/hp-bar-empty.png";
+import hpBarGreenPng from "./assets/game/hp-bar.png";
+import hpBarOrangePng from "./assets/game/hp-bar-orange.png";
+import hpBarRedPng from "./assets/game/hp-bar-red.png";
+import hpBarEmptyPng from "./assets/game/hp-bar-empty.png";
 
 /** A spritesheet asset: the texture URL + its parsed Aseprite atlas. `atlas` is
  *  left as `unknown` so the kit stays decoupled from any one engine's atlas type

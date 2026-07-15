@@ -17,8 +17,8 @@
 import type { CSSProperties } from "react";
 import { assetUrl } from "./asset-url";
 import { BASIC_GLYPH_METRICS } from "./bitmap-metrics";
-import asciiPng from "./assets/d8-font-basic-8x8.png";
-import outlinePng from "./assets/d8-font-8x7-outline.png";
+import asciiPng from "./assets/fonts/d8-font-basic-8x8.png";
+import outlinePng from "./assets/fonts/d8-font-8x7-outline.png";
 
 // Proportional advance for the basic atlas: each glyph occupies its INK width
 // plus a gap, instead of the full monospace cell — so narrow glyphs

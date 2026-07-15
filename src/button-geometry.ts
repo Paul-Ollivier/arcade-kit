@@ -1,8 +1,8 @@
 import { assetUrl } from "./asset-url";
-import outlinePng from "./assets/d8-button-outline.png";
-import outlinePressedPng from "./assets/d8-button-outline-pressed.png";
-import fillPng from "./assets/d8-button-fill.png";
-import fillPressedPng from "./assets/d8-button-fill-pressed.png";
+import outlinePng from "./assets/ui/d8-button-outline.png";
+import outlinePressedPng from "./assets/ui/d8-button-outline-pressed.png";
+import fillPng from "./assets/ui/d8-button-fill.png";
+import fillPressedPng from "./assets/ui/d8-button-fill-pressed.png";
 
 /**
  * Single source of truth for the D8 nine-slice button's sprites and geometry,

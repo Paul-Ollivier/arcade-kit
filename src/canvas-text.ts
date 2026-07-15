@@ -13,7 +13,7 @@
 
 import { assetUrl } from "./asset-url";
 import { TYPE_SCALE, type TypeRole } from "./typography";
-import basicPng from "./assets/d8-font-basic-8x8.png";
+import basicPng from "./assets/fonts/d8-font-basic-8x8.png";
 
 // d8-font-basic-8x8.png — 10×10 grid of 8×8 cells, printable ASCII 0x20–0x7e
 // row-major from space. The atlas is white, so a per-colour tint is a flat fill.

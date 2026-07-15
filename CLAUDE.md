@@ -13,11 +13,16 @@ The package **ships TS/TSX source** (no build step) and **imports its PNGs as mo
 
 ## Exports
 
-Two subpath entries (both resolve straight to source):
+Subpath entries (all resolve straight to source):
 
 - **`@domin8/arcade-kit`** → `src/index.ts` — DOM/React kit.
 - **`@domin8/arcade-kit/pixi`** → `src/pixi/index.ts` — Pixi adapter. Pulls in `pixi.js` (an *optional* peer dep), so DOM-only consumers that import only the root never load Pixi.
 - **`@domin8/arcade-kit/game`** → `src/game.ts` — shared **game art** (NOT UI chrome): fighter spritesheets (`CHARACTER_ATLASES`), VFX atlases (`FIGHT_EFFECT_ATLAS`, `BLOOD_ATLAS`) and props (`THRONE_URL`) for the Pixi brawlers (arena; flip when un-deferred). On a separate subpath so DOM-only root consumers don't pull in game sprites. Each spritesheet is `{ texture: <png url>, atlas: <parsed Aseprite json> }` — feed both into your Pixi loader (atlas is `unknown`; cast at the call site). Assets live in `src/assets/game/`. Needs `resolveJsonModule` (set in tsconfig).
+- **`@domin8/arcade-kit/sfx`** → `src/sfx.ts` — shared **cross-game one-shots** (`INSERT_COIN_SFX_URL`, …) as embedded `data:` URLs (bundlers won't module-import `.mp3` without per-consumer loader config, so the web-font embed pattern applies). Own subpath so only games that import it carry the bytes; **budget ~32 KB per sfx** — music and long stingers stay in each game's `public/`, never here. Raw mp3 sources live in `src/assets/audio/`; regeneration one-liner at the top of `src/sfx-data.ts`. Games should construct the `Audio` element lazily at first play so a muted player never pays for the bytes.
+
+## Asset layout (`src/assets/`)
+
+`fonts/` (bitmap-font atlases + the woff2), `ui/` (buttons, panels, chat bubble, glove, dither gradients), `sprites/` (golden coin + vault), `audio/` (raw mp3 sources for `/sfx`), `game/` (fighter/VFX atlases + hp bars). First-party files are `d8-<kebab>.<ext>`; every asset is consumed via an exported URL constant, never deep-imported by consumers.
 
 ### DOM kit (`src/index.ts`)
 - `NineSliceButton` (`nine-slice-button.tsx` + `.css`) — imports its own interaction CSS, no global stylesheet needed.
@@ -74,7 +79,7 @@ It's a **public git dependency** — no token/SSH needed. Consumers pin a **tag*
 "@domin8/arcade-kit": "github:Paul-Ollivier/arcade-kit#v1.9.0"
 ```
 
-Bun resolves the `#fragment` as a git ref, **not** an npm semver range — `#semver:^1.0.0` does NOT work. Current published tag: **v1.26.0** (added the fighter **HP-bar** capsule art on the `/game` subpath — `HP_BAR_URLS` {green/orange/red fill + dark `empty` track} + `HP_BAR_SLICE`, a 12×6 horizontal 3-slice; basic/body font advance is back to the full 8px cell — the v1.15.0 1px-tighter spacing was reverted across all renderers; v1.15.x added + made self-contained the pixel **web font** — `loadPixelWebFont`/`PIXEL_FONT_FAMILY`, embedded as a base64 data URL; v1.13.0 formalized the **typography** system — `TYPE_SCALE`, `FONT_BODY`/`FONT_TITLE`, `makeBitmapText`, canvas `drawBitmapText`, recoloured the basic atlas white). Tags follow semver intent (breaking visual/API change → major). After rollout the hub + all games pin v1.14.0.
+Bun resolves the `#fragment` as a git ref, **not** an npm semver range — `#semver:^1.0.0` does NOT work. Latest published tag = `git tag --sort=-v:refname` (never trust prose for the current version). Recent history: v1.28.0 organized `src/assets/` into `fonts/ui/sprites/audio/game` subdirs (no export changes) and added the **`/sfx` subpath** — shared cross-game one-shots as embedded data URLs, starting with `INSERT_COIN_SFX_URL` (promoted from the arena); v1.26.0 added the fighter **HP-bar** capsule art on the `/game` subpath — `HP_BAR_URLS` {green/orange/red fill + dark `empty` track} + `HP_BAR_SLICE`, a 12×6 horizontal 3-slice; basic/body font advance is back to the full 8px cell — the v1.15.0 1px-tighter spacing was reverted across all renderers; v1.15.x added + made self-contained the pixel **web font** — `loadPixelWebFont`/`PIXEL_FONT_FAMILY`, embedded as a base64 data URL; v1.13.0 formalized the **typography** system — `TYPE_SCALE`, `FONT_BODY`/`FONT_TITLE`, `makeBitmapText`, canvas `drawBitmapText`, recoloured the basic atlas white. Tags follow semver intent (breaking visual/API change → major).
 
 **Release flow:** bump `version` in `package.json`, commit, `git tag vX.Y.Z`, push tag, then bump the `#vX.Y.Z` ref in each downstream repo's `package.json` deliberately. Downstream upgrades are opt-in — nothing auto-updates.
 
