@@ -2,8 +2,8 @@ import { Assets, BitmapFont, BitmapText, Cache, Texture } from "pixi.js";
 import { assetUrl } from "../asset-url";
 import { TYPE_SCALE, FONT_CELL, type TypeRole } from "../typography";
 import { BASIC_GLYPH_METRICS } from "../bitmap-metrics";
-import outlinePng from "../assets/d8-font-8x7-outline.png";
-import basicPng from "../assets/d8-font-basic-8x8.png";
+import outlinePng from "../assets/fonts/d8-font-8x7-outline.png";
+import basicPng from "../assets/fonts/d8-font-basic-8x8.png";
 
 // Proportional advance for the basic body face — mirrors the DOM BitmapText so
 // Pixi text spacing matches the panels: glyph advance = ink width + a gap;
