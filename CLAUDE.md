@@ -1,6 +1,8 @@
 # @domin8/arcade-kit
 
-Shared pixel-art arcade UI for the **Domin8 hub** and its games (hub, flip, RR-Casino). One canonical home for the retro 9-slice button, panels, fields, bitmap fonts, the cabinet `postMessage` bridge, and their PNG assets — so every repo renders identical chrome instead of carrying its own divergent copy.
+Shared pixel-art arcade UI for the **Domin8 hub** and its games. One canonical home for the retro 9-slice button, panels, fields, bitmap fonts, the cabinet `postMessage` bridge, and their PNG assets — so every repo renders identical chrome instead of carrying its own divergent copy.
+
+Consumers = every repo whose `package.json` pins `arcade-kit#v…`. Derive the live list with `grep -H "arcade-kit#v" */package.json` from the Domin8 root rather than trusting a list here; today it is the v1 set (hub, arena, RR-Casino, janken) plus the deferred `flip`, which stays frozen on an older tag on purpose.
 
 The package **ships TS/TSX source** (no build step) and **imports its PNGs as modules** — so each consumer bundles the sprites with its own hashed URLs. No `/public` copying.
 
@@ -34,7 +36,7 @@ Subpath entries (all resolve straight to source):
 - `loadPixelWebFont` / `PIXEL_FONT_FAMILY` (`web-font.ts`) — the kit pixel face as a real **web font** (`assets/d8-pixel.woff2`, generated from the same `basicpixel_8x8` atlas). Lets CSS-styled DOM text + wrapping prose use the kit pixel face via a normal `font-family`, matching `BitmapText`. Call `loadPixelWebFont()` once on the client; set `font-family: PIXEL_FONT_FAMILY` (`"D8 Pixel"`) or point a `--font-pixel` CSS var at it. Monospace 8px cell — crispest at font sizes that are multiples of 8px.
 - `assetUrl` (`asset-url.ts`) — normalises a PNG import that's either a URL string (bare bundler) or a Next `StaticImageData` object.
 - `GOLDEN_COIN_URLS` (`coins.ts`) — the six-frame golden-coin spin as resolved URLs (source in `assets/d8-golden-coin.aseprite`). One canonical gold coin for every game/hub; the Pixi adapter wraps it in a ready-to-load helper.
-- `VAULT_BIG_URL` / `VAULT_TITLE_URL` (`vault.ts`) — the steel vault-door sprite (116×114) + the gold "VAULT" wordmark (54×15) for THE VAULT jackpot UI (hub's `piggy-bank-counter`). Plain URL strings; render `image-rendering: pixelated`.
+- `VAULT_BIG_URL` / `VAULT_TITLE_URL` (`vault.ts`) — the steel vault-door sprite (116×114) + the gold "VAULT" wordmark (54×15) for THE VAULT jackpot UI (hub's `motherlode-counter.tsx`). Plain URL strings; render `image-rendering: pixelated`.
 - `CHAT_BUBBLE_URL` (`chat-bubble.ts`) / `GLOVE_POINTER_URL` (`glove.ts`) — resolved URLs for the hub's chat-tab icon and the cabinet's flanking pointing-glove nav arrow. Plain URL strings (for `<img src>` / `url(...)`), so the hub no longer carries its own `/public` copies.
 - Cabinet bridge (`cabinet.ts`): `isCabinet`, `isFreePlay`, `postGameOver`, `postExit`, `postPlayForReal`, type `GameResult`. The other end is the hub (`GAME_ORIGINS` whitelist).
 - `PlayForRealButton` (`play-for-real-button.tsx`), `PlayModeToggle` + `PlayMode` (`play-mode-toggle.tsx`).
@@ -76,12 +78,14 @@ drawBitmapText(ctx, "INSERT COIN", x, y, { role: "body", color: "#f5c518", align
 It's a **public git dependency** — no token/SSH needed. Consumers pin a **tag**:
 
 ```jsonc
-"@domin8/arcade-kit": "github:Paul-Ollivier/arcade-kit#v1.9.0"
+"@domin8/arcade-kit": "github:Paul-Ollivier/arcade-kit#vX.Y.Z"
 ```
 
-Bun resolves the `#fragment` as a git ref, **not** an npm semver range — `#semver:^1.0.0` does NOT work. Latest published tag = `git tag --sort=-v:refname` (never trust prose for the current version). Recent history: v1.28.1 (fix: pixi font import paths after the reorg; v1.28.0 is broken for /pixi consumers — skip it) + v1.28.0 organized `src/assets/` into `fonts/ui/sprites/audio/game` subdirs (no export changes) and added the **`/sfx` subpath** — shared cross-game one-shots as embedded data URLs, starting with `INSERT_COIN_SFX_URL` (promoted from the arena); v1.26.0 added the fighter **HP-bar** capsule art on the `/game` subpath — `HP_BAR_URLS` {green/orange/red fill + dark `empty` track} + `HP_BAR_SLICE`, a 12×6 horizontal 3-slice; basic/body font advance is back to the full 8px cell — the v1.15.0 1px-tighter spacing was reverted across all renderers; v1.15.x added + made self-contained the pixel **web font** — `loadPixelWebFont`/`PIXEL_FONT_FAMILY`, embedded as a base64 data URL; v1.13.0 formalized the **typography** system — `TYPE_SCALE`, `FONT_BODY`/`FONT_TITLE`, `makeBitmapText`, canvas `drawBitmapText`, recoloured the basic atlas white. Tags follow semver intent (breaking visual/API change → major).
+Bun resolves the `#fragment` as an exact git ref, **not** an npm semver range — `#semver:^1.0.0` does NOT work. Tags follow semver intent (breaking visual/API change → major).
 
-**Release flow:** bump `version` in `package.json`, commit, `git tag vX.Y.Z`, push tag, then bump the `#vX.Y.Z` ref in each downstream repo's `package.json` deliberately. Downstream upgrades are opt-in — nothing auto-updates.
+**Never write the current version into this file.** `git tag --sort=-v:refname | head -1` is the only truth; a version in prose is stale the next release. Same for the changelog — `git log`/`git tag` own it.
+
+**Release flow: use the `/kit-release` skill.** It owns the whole recipe (typecheck → bump → tag → push → bump every consumer's pin → install → verify → commit), including how to derive the consumer list. Don't improvise a second one here. The two rules worth knowing up front: nothing auto-updates, so a release isn't done until every v1 consumer's pin has moved; and no downstream may ever point at a branch.
 
 ## Gotchas
 
@@ -89,4 +93,5 @@ Bun resolves the `#fragment` as a git ref, **not** an npm semver range — `#sem
 - **Peer deps**: React 18+ / React-DOM 18+ (built against the hub's React 19 / Next 16); `pixi.js` >=8 is optional, only for `/pixi`.
 - **SSR**: cabinet helpers all guard `typeof window === "undefined"` and `post*` no-op when not embedded — safe to call unconditionally.
 - **Pixel alignment**: button size is decoupled from pixel size via `pixelScale`/`scale`; match a sibling sprite's native scale (e.g. `pixelScale="0.4vh"`) so pixels line up.
-- Same `as const`-on-`style`-prop hazard as the hub applies — type style objects as `CSSProperties`.
+- **`BitmapText` covers printable ASCII 32–126 only** — `×`, `🔑` and emoji render as blank gaps in every consumer. Use `x` and the word `KEYS` until the atlas grows those glyphs.
+- Style objects spread into a JSX `style` prop are `CSSProperties`, never `as const` (see the root manual — it breaks the production build, not dev).
