@@ -35,6 +35,8 @@ import bloodPng from "./assets/game/blood-spritesheet.png";
 import bloodJson from "./assets/game/blood-spritesheet.json";
 
 import thronePng from "./assets/game/throne.png";
+import lootBoxPng from "./assets/game/d8-loot-box.png";
+import lootBoxJson from "./assets/game/d8-loot-box.json";
 
 // Fighter HP bar — a 12×6 pixel-art capsule (black outline, 2-tone shaded fill,
 // rounded transparent end caps) used as a horizontal 3-slice over each fighter
@@ -79,6 +81,14 @@ export const BLOOD_ATLAS: AtlasAsset = atlas(bloodPng, bloodJson);
 
 /** Winner-pose throne prop (single texture, no atlas). */
 export const THRONE_URL = assetUrl(thronePng);
+
+/** The animated gold loot box (Aseprite atlas, 22 trimmed frames on a 64×64
+ *  source): 0–5 idle shine on the closed chest, 6–10 the BACK half of the
+ *  pop-open jump, 11–16 idle shine dup, 17–21 the FRONT lip of the open jump
+ *  (draw coins between the two halves so they land INSIDE). Used by arena's
+ *  WINNER TAKES prize group and the hub's season-pass chests. Not Pixi-bound:
+ *  DOM consumers draw the frames on a canvas from `texture` + `atlas`. */
+export const LOOT_BOX_ATLAS: AtlasAsset = atlas(lootBoxPng, lootBoxJson);
 
 /** Fighter HP-bar capsule, by state. `green`/`orange`/`red` are the draining
  *  fill (pick by HP fraction); `empty` is the dark track rendered behind it.
