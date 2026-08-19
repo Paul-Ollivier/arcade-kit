@@ -35,6 +35,7 @@ import bloodPng from "./assets/game/blood-spritesheet.png";
 import bloodJson from "./assets/game/blood-spritesheet.json";
 
 import thronePng from "./assets/game/throne.png";
+import carrotPng from "./assets/game/carrot.png";
 import lootBoxPng from "./assets/game/d8-loot-box.png";
 import lootBoxJson from "./assets/game/d8-loot-box.json";
 
@@ -81,6 +82,16 @@ export const BLOOD_ATLAS: AtlasAsset = atlas(bloodPng, bloodJson);
 
 /** Winner-pose throne prop (single texture, no atlas). */
 export const THRONE_URL = assetUrl(thronePng);
+
+/** A pixel carrot (single texture, no atlas) — Rabbit Royale's food prop and
+ *  the icon of anything the house gives away in carrots: the season pass'
+ *  FREE-ROUND rungs, its launcher tab, the "rounds waiting" strip. The source
+ *  is TALL — 13x29, see `CARROT_SIZE` — so size it by HEIGHT and derive the
+ *  width, or it renders squashed. Render `image-rendering: pixelated`. */
+export const CARROT_URL = assetUrl(carrotPng);
+
+/** {@link CARROT_URL}'s native pixel size, so consumers keep its aspect. */
+export const CARROT_SIZE = { width: 13, height: 29 } as const;
 
 /** The animated gold loot box (Aseprite atlas, 22 trimmed frames on a 64×64
  *  source): 0–5 idle shine on the closed chest, 6–10 the BACK half of the
