@@ -2,6 +2,7 @@
 
 import { type CSSProperties, type HTMLAttributes, forwardRef, useEffect, useState } from "react";
 import { assetUrl } from "./asset-url";
+import { PanelFaceContext } from "./panel-face";
 import panelPng from "./assets/ui/d8-panel-bg.png";
 import panelCashoutPng from "./assets/ui/d8-panel-cashout-bg.png";
 import panelShadePng from "./assets/ui/d8-panel-shade.png";
@@ -38,6 +39,14 @@ export type NineSlicePanelVariant = "default" | "cashout";
 const SRC: Record<NineSlicePanelVariant, string> = {
   default: assetUrl(panelPng),
   cashout: assetUrl(panelCashoutPng),
+};
+// The flat centre tone of each baked variant sprite, sampled from the PNGs.
+// Published through PanelFaceContext so chrome sitting on the panel (the
+// CloseButton) can cut its own tone from the panel's — keep these in sync if
+// the sprites are ever recoloured.
+const VARIANT_FACE: Record<NineSlicePanelVariant, string> = {
+  default: "#edb75c",
+  cashout: "#7fd59b",
 };
 const SHAPE_SRC = assetUrl(panelPng);       // alpha silhouette (colour ignored when baking)
 const SHADE_SRC = assetUrl(panelShadePng);  // hue-independent highlight + shadow + outline
@@ -136,7 +145,10 @@ export const NineSlicePanel = forwardRef<HTMLDivElement, NineSlicePanelProps>(fu
 
   return (
     <div ref={ref} className={className} style={{ ...frame, ...style }} {...rest}>
-      {children}
+      {/* Publish the face so panel chrome can derive its own tone from it. */}
+      <PanelFaceContext.Provider value={color ?? VARIANT_FACE[variant]}>
+        {children}
+      </PanelFaceContext.Provider>
     </div>
   );
 });

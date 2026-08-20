@@ -28,7 +28,7 @@ Subpath entries (all resolve straight to source):
 
 ### DOM kit (`src/index.ts`)
 - `NineSliceButton` (`nine-slice-button.tsx` + `.css`) — imports its own interaction CSS, no global stylesheet needed.
-- `NineSlicePanel` / `NineSlicePanelVariant` (`nine-slice-panel.tsx`) — has a `color` prop + cash-out green variant.
+- `NineSlicePanel` / `NineSlicePanelVariant` (`nine-slice-panel.tsx`) — has a `color` prop + cash-out green variant. It publishes its own face through `PanelFaceContext` (`panel-face.ts`), so chrome sitting on a panel can cut its tone from the panel's: `CloseButton` reads it and paints a much darker version of the same colour, with the glyph lightened from it. Outside a panel the [X] takes `panelColor`, or falls back to slate. `usePanelFace` / `mixColor` / `colorLightness` are exported for anything else that needs the same trick.
 - `NineSliceField` (`nine-slice-field.tsx` + `.css`).
 - `BitmapText`, `TitleText` (`bitmap-font.tsx`) — `BitmapText` uses `basicpixel_8x8.png` as a CSS mask (color inherits); `TitleText` uses `font-8x7-outline.png` as a background image (own palette, auto upper-cased).
 - **Typography system** (`typography.ts`) — `TYPE_SCALE` (named size scale) + `TypeRole` + `FONT_CELL`. See **Typography** below. The single source of truth for font roles + sizes, shared by the DOM, Pixi and canvas renderers.
