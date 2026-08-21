@@ -31,6 +31,9 @@ export { isCabinet, isFreePlay, postGameOver, postExit, postPlayForReal } from "
 export type { GameResult } from "./cabinet";
 export { PlayForRealButton } from "./play-for-real-button";
 export { PlayModeToggle } from "./play-mode-toggle";
+// The shared chest-opening ceremony (full-screen rays → rumble → flash → prize).
+export { ChestReveal, REVEAL_ACCENT } from "./chest-reveal";
+export type { ChestRevealProps, RevealRarity, RevealPhase } from "./chest-reveal";
 export type { PlayMode, PlayModeToggleProps } from "./play-mode-toggle";
 // Renderer-agnostic button primitives (also consumed by the Pixi adapter at
 // `@domin8/arcade-kit/pixi`). Exposed so games can read the shared geometry.
