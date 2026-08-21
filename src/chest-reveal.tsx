@@ -142,8 +142,14 @@ export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, capti
   // The JS rumble: amplitude grows with elapsed time (quadratically, capped),
   // the jitter itself is a deterministic sum of sines so it looks restless,
   // not random-flickery. Stops the instant the phase leaves "rumble".
+  //
+  // `mounted` is a REAL dependency, not noise: the component renders null until
+  // it flips (the portal needs a document), so on the first pass `chestRef` is
+  // empty and this effect bails. Without it in the deps nothing re-runs it when
+  // the DOM finally exists, and both the shake AND the synth stay dead for the
+  // whole ceremony — silently, because every other beat is CSS.
   useEffect(() => {
-    if (phase !== "rumble" || reduced) return;
+    if (!mounted || phase !== "rumble" || reduced) return;
     const el = chestRef.current;
     if (!el) return;
     rumbleStart.current = performance.now();
@@ -177,7 +183,7 @@ export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, capti
       rumbleRef.current?.stop();
       rumbleRef.current = null;
     };
-  }, [phase, reduced]);
+  }, [mounted, phase, reduced]);
 
   // Phase machine: rumble → (roll known ∧ floor reached) → blow → flash →
   // reveal → shown. The gate and the chain are SEPARATE effects on purpose: a
