@@ -29,6 +29,14 @@ import {
   IMPACT_MP3_DATA,
   FANFARE_MP3_DATA,
   BLAST_MP3_DATA,
+  WHOOSH_MP3_DATA,
+  UI_CLICK_MP3_DATA,
+  MODAL_OPEN_MP3_DATA,
+  MODAL_CLOSE_MP3_DATA,
+  CHAT_BLIP_MP3_DATA,
+  TICK_MP3_DATA,
+  LOSE_MP3_DATA,
+  MATCH_FOUND_MP3_DATA,
 } from "./sfx-data";
 
 /** The arcade "insert coin" chirp — a bet placed, a game joined. (Origin: the
@@ -60,6 +68,34 @@ export const POWER_UP_SFX_URL = RISER_MP3_DATA;
 /** The win fanfare — a jackpot, a legendary pull, a match won. ~4 s. */
 export const FANFARE_SFX_URL = FANFARE_MP3_DATA;
 
+// ── The UI layer ───────────────────────────────────────────────────────────
+// These eight are SYNTHESISED, not recorded: square/triangle oscillators and an
+// NES-style LFSR noise channel, written by `tools/synth-sfx.py` (stdlib Python,
+// ~0.1 s for the set). Two reasons. There was nothing in the arcade's libraries
+// that fit these moments, and a generated sound has no licence attached — and
+// the chiptune timbre matches the pixel art by construction rather than by
+// luck. To retune one, edit its recipe in the tool, re-run, re-encode, re-embed;
+// the tool keeps ~28% headroom because mp3's inter-sample peaks overshoot.
+
+/** A noise sweep — a screen transition, a game launching or exiting. */
+export const WHOOSH_SFX_URL = WHOOSH_MP3_DATA;
+/** A dry 45 ms blip — a button, a carousel arrow. Quiet on purpose: it fires
+ *  more often than anything else here. */
+export const UI_CLICK_SFX_URL = UI_CLICK_MP3_DATA;
+/** Two rising steps — a panel arriving. */
+export const MODAL_OPEN_SFX_URL = MODAL_OPEN_MP3_DATA;
+/** The same two steps, descending — a panel leaving, the [X]. */
+export const MODAL_CLOSE_SFX_URL = MODAL_CLOSE_MP3_DATA;
+/** A soft high two-note — a chat message. Deliberately gentle. */
+export const CHAT_BLIP_SFX_URL = CHAT_BLIP_MP3_DATA;
+/** A 30 ms click for a counter rolling up (THE VAULT). Short enough to fire
+ *  repeatedly without turning into a drone. */
+export const TICK_SFX_URL = TICK_MP3_DATA;
+/** A descending minor figure — a loss. Lands, doesn't punish. */
+export const LOSE_SFX_URL = LOSE_MP3_DATA;
+/** A rising three-note call — an opponent found, something ready to play. */
+export const MATCH_FOUND_SFX_URL = MATCH_FOUND_MP3_DATA;
+
 /** Everything above, keyed — handy for a debug panel or a story control. */
 export const SFX_URLS = {
   insertCoin: INSERT_COIN_SFX_URL,
@@ -73,6 +109,14 @@ export const SFX_URLS = {
   powerUp: POWER_UP_SFX_URL,
   fanfare: FANFARE_SFX_URL,
   blast: BLAST_SFX_URL,
+  whoosh: WHOOSH_SFX_URL,
+  uiClick: UI_CLICK_SFX_URL,
+  modalOpen: MODAL_OPEN_SFX_URL,
+  modalClose: MODAL_CLOSE_SFX_URL,
+  chatBlip: CHAT_BLIP_SFX_URL,
+  tick: TICK_SFX_URL,
+  lose: LOSE_SFX_URL,
+  matchFound: MATCH_FOUND_SFX_URL,
 } as const;
 
 export type SfxName = keyof typeof SFX_URLS;
