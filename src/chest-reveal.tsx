@@ -69,8 +69,11 @@ export interface ChestRevealProps {
    *  rumble keeps escalating and the rays stay neutral until it's set. */
   rarity: RevealRarity | null;
   /** The chest art to shake and blow up. Called with the current phase so the
-   *  consumer can pop its own lid on "blow"; from "flash" on it is unmounted. */
-  chest: (phase: RevealPhase) => ReactNode;
+   *  consumer can pop its own lid on "blow"; from "flash" on it is unmounted.
+   *  Pass `null` for a prize that arrives with no container — a claim rather
+   *  than an opening (the pass' free rounds): the stage then skips the rumble
+   *  entirely and starts at the burst, because there is nothing to shake. */
+  chest: ((phase: RevealPhase) => ReactNode) | null;
   /** The prize, shown from "reveal": an image, a sprite, a line of TitleText… */
   item: ReactNode;
   /** Slammed over the item once shown (e.g. "LEGENDARY!"). ASCII only. */
@@ -118,7 +121,11 @@ const STAMP_DELAY_MS = 380; // after "shown" begins
 const RUMBLE_MAX_PX = 11;   // peak jitter amplitude, in px (and ~deg/1.4 of tilt)
 
 export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, caption = "TAP TO CONTINUE", zIndex = 1000, sfx, sfxMuted = false, volume = 1 }: ChestRevealProps) {
-  const [phase, setPhase] = useState<RevealPhase>("rumble");
+  // No chest = no rumble: a claim has no container to shake, so the stage opens
+  // on the burst. `chestless` is read at mount only — swapping the prop
+  // mid-ceremony would restart the machine, which no caller wants.
+  const chestless = useRef(chest === null).current;
+  const [phase, setPhase] = useState<RevealPhase>(chestless ? "blow" : "rumble");
   const [minRumbleDone, setMinRumbleDone] = useState(false);
   const [mounted, setMounted] = useState(false);
   const reduced = useReducedMotion();
@@ -135,9 +142,10 @@ export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, capti
 
   // Rumble floor.
   useEffect(() => {
+    if (chestless) return;
     const t = window.setTimeout(() => setMinRumbleDone(true), reduced ? 300 : RUMBLE_MIN_MS);
     return () => window.clearTimeout(t);
-  }, [reduced]);
+  }, [reduced, chestless]);
 
   // The JS rumble: amplitude grows with elapsed time (quadratically, capped),
   // the jitter itself is a deterministic sum of sines so it looks restless,
@@ -197,9 +205,13 @@ export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, capti
   useEffect(() => {
     const next = NEXT_PHASE[phase];
     if (!next) return;
+    // A chestless claim opens straight on the burst, so it has no rumble to
+    // cover the server call — the full-screen white does that instead: hold
+    // there until the prize is known rather than draining onto a placeholder.
+    if (next[0] === "reveal" && rarity === null) return;
     const t = window.setTimeout(() => setPhase(next[0]), next[1]);
     return () => window.clearTimeout(t);
-  }, [phase]);
+  }, [phase, rarity]);
 
   // One-shots, fired on the phase they belong to. The riser goes off WITH the
   // blow rather than before it: the stage only learns the roll landed at that
@@ -263,8 +275,8 @@ export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, capti
         <RayBurst palette={RAY_PALETTES[rayPalette]} />
       </div>
 
-      {/* The chest, centred, rumbling — until it blows. */}
-      {!past("flash") && (
+      {/* The chest, centred, rumbling — until it blows. Absent for a claim. */}
+      {chest && !past("flash") && (
         <div style={centreStyle} aria-hidden>
           <div ref={chestRef} className={phase === "blow" ? "d8-reveal-blow" : undefined} style={{ display: "inline-flex", willChange: "transform" }}>
             {chest(phase)}
