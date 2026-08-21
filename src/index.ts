@@ -30,6 +30,10 @@ export type { ArrowDir } from "./arrows";
 export { PixelArrow, usePressFlash, usePixelTint, tintPixelSprite } from "./pixel-arrow";
 export type { PixelArrowProps } from "./pixel-arrow";
 export { GOLDEN_COIN_URLS } from "./coins";
+// Loot props (still images, not spin cycles): cut gems and metal ingots for
+// showers, chest reveals and payout celebrations.
+export { JEWEL_URLS, BAR_URLS, TREASURE_SIZES } from "./treasure";
+export type { JewelName, BarName } from "./treasure";
 export { VAULT_BIG_URL, VAULT_SMALL_URL, VAULT_TITLE_URL } from "./vault";
 export { isCabinet, isFreePlay, postGameOver, postExit, postPlayForReal } from "./cabinet";
 export type { GameResult } from "./cabinet";
