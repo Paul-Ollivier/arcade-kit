@@ -14,6 +14,7 @@
   --bevel-h:   var(--bevel-rest);
   --outline:   var(--outline-rest);
   --fill-mask: var(--fill-rest);
+  --hl-mask:   var(--hl-rest);
 }
 .nine-btn:hover:not(:disabled) { filter: brightness(1.07); }
 /* Statically pressed (the `pressed` prop) — same operands as :active, no pointer
@@ -23,6 +24,7 @@
   --bevel-h:   var(--bevel-press);
   --outline:   var(--outline-press);
   --fill-mask: var(--fill-press);
+  --hl-mask:   var(--hl-press);
 }
 .nine-btn--pressed .nine-btn__content { transform: translateY(calc(var(--u) * 2)); }
 /* Pressed: swap to the shifted-down sprites and grow the top inset / shrink the
@@ -35,6 +37,7 @@
   --bevel-h:   var(--bevel-press);
   --outline:   var(--outline-press);
   --fill-mask: var(--fill-press);
+  --hl-mask:   var(--hl-press);
 }
 .nine-btn:active:not(:disabled) .nine-btn__content { transform: translateY(calc(var(--u) * 2)); }
 .nine-btn__content { transition: transform 60ms ease; }

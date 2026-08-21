@@ -3,6 +3,10 @@ import outlinePng from "./assets/ui/d8-button-outline.png";
 import outlinePressedPng from "./assets/ui/d8-button-outline-pressed.png";
 import fillPng from "./assets/ui/d8-button-fill.png";
 import fillPressedPng from "./assets/ui/d8-button-fill-pressed.png";
+import framePng from "./assets/ui/d8-button-frame.png";
+import framePressedPng from "./assets/ui/d8-button-frame-pressed.png";
+import highlightPng from "./assets/ui/d8-button-highlight.png";
+import highlightPressedPng from "./assets/ui/d8-button-highlight-pressed.png";
 
 /**
  * Single source of truth for the D8 nine-slice button's sprites and geometry,
@@ -21,6 +25,12 @@ import fillPressedPng from "./assets/ui/d8-button-fill-pressed.png";
  * (≈166/255) so the gloss reads softer on every button, across both the DOM and
  * Pixi renderers (they share these PNGs). The black frame stays fully opaque.
  * To retune, rebake from the git history's full-alpha original.
+ *
+ * The outline is ALSO shipped split in two — FRAME (the black pixels only) and
+ * HIGHLIGHT (the gloss pixels only, white at the same alpha) — so a renderer
+ * can paint the gloss in a colour of its own (the DOM button's `highlightColor`
+ * uses the highlight as a mask). frame ∘ highlight recomposes the outline
+ * pixel-for-pixel; regenerate all four from the outline, never by hand.
  */
 
 // Native-px geometry of the source art (one source pixel; renderers scale it).
@@ -33,8 +43,13 @@ export const BEVEL_PRESSED = BEVEL - SINK;   // pressed bottom inset: thinned li
 
 /** Resolved URLs for the four button sprites (resting + pressed twins). */
 export const BUTTON_SPRITE_URLS = {
-  fill:           assetUrl(fillPng),
-  outline:        assetUrl(outlinePng),
-  fillPressed:    assetUrl(fillPressedPng),
-  outlinePressed: assetUrl(outlinePressedPng),
+  fill:             assetUrl(fillPng),
+  outline:          assetUrl(outlinePng),
+  fillPressed:      assetUrl(fillPressedPng),
+  outlinePressed:   assetUrl(outlinePressedPng),
+  // The outline split in two (see above) — for tinting the gloss.
+  frame:            assetUrl(framePng),
+  framePressed:     assetUrl(framePressedPng),
+  highlight:        assetUrl(highlightPng),
+  highlightPressed: assetUrl(highlightPressedPng),
 } as const;

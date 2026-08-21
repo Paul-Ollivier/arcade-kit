@@ -57,3 +57,53 @@ export function mixColor(css: string, target: "black" | "white", amount: number)
   const t = target === "black" ? 0 : 255;
   return `#${rgb.map((c) => hex(c + (t - c) * amount)).join("")}`;
 }
+
+/**
+ * Re-cut a colour at a new lightness and/or saturation, KEEPING ITS HUE — for
+ * chrome that should read as the same family as its panel but "much lighter
+ * and more saturated" (or the reverse), which a plain mix toward white/black
+ * can't do: mixing toward white washes the hue out. Each target is either an
+ * absolute 0–1 value or a function of the current one. Null when the colour
+ * can't be read (same contract as `mixColor`).
+ */
+export function adjustColor(
+  css: string,
+  to: { lightness?: number | ((l: number) => number); saturation?: number | ((s: number) => number) },
+): string | null {
+  const rgb = parseColor(css);
+  if (!rgb) return null;
+  const [h, s, l] = rgbToHsl(rgb);
+  const pick = (t: number | ((v: number) => number) | undefined, v: number) =>
+    t === undefined ? v : Math.max(0, Math.min(1, typeof t === "function" ? t(v) : t));
+  const [r, g, b] = hslToRgb(h, pick(to.saturation, s), pick(to.lightness, l));
+  return `#${hex(r)}${hex(g)}${hex(b)}`;
+}
+
+function rgbToHsl([r, g, b]: [number, number, number]): [number, number, number] {
+  const R = r / 255, G = g / 255, B = b / 255;
+  const max = Math.max(R, G, B), min = Math.min(R, G, B);
+  const l = (max + min) / 2;
+  if (max === min) return [0, 0, l];
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h = 0;
+  if (max === R) h = (G - B) / d + (G < B ? 6 : 0);
+  else if (max === G) h = (B - R) / d + 2;
+  else h = (R - G) / d + 4;
+  return [h / 6, s, l];
+}
+
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+  if (s === 0) return [l * 255, l * 255, l * 255];
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const f = (t: number) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  return [f(h + 1 / 3) * 255, f(h) * 255, f(h - 1 / 3) * 255];
+}

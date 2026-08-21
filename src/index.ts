@@ -2,7 +2,7 @@ export { NineSliceButton } from "./nine-slice-button";
 export type { NineSliceButtonProps } from "./nine-slice-button";
 export { CloseButton } from "./close-button";
 export type { CloseButtonProps } from "./close-button";
-export { PanelFaceContext, usePanelFace, mixColor, colorLightness } from "./panel-face";
+export { PanelFaceContext, usePanelFace, mixColor, adjustColor, colorLightness } from "./panel-face";
 export { NineSlicePanel } from "./nine-slice-panel";
 export type { NineSlicePanelProps, NineSlicePanelVariant } from "./nine-slice-panel";
 export { NineSliceField } from "./nine-slice-field";

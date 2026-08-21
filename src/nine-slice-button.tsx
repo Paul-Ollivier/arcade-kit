@@ -87,6 +87,11 @@ export interface NineSliceButtonProps extends ButtonHTMLAttributes<HTMLButtonEle
    *  harsh against the bright face; the slight translucency lets the face tint
    *  through and softens the label everywhere. */
   textColor?: string;
+  /** Colour of the outline's inner gloss (the highlight row along the bevel
+   *  seam + right rail). Default is the sprite's baked white; pass a colour to
+   *  cut the gloss from the button's own family (the [X] does). Painted through
+   *  the split highlight sprite, at the same 65% alpha the white is baked at. */
+  highlightColor?: string;
   /** Rendered size of one source pixel, as any CSS length (e.g. "0.4vh", "4px"). Overrides `scale`. */
   pixelScale?: string;
   /** Px shorthand for pixelScale (pixelScale = `${scale}px`). */
@@ -101,7 +106,7 @@ export interface NineSliceButtonProps extends ButtonHTMLAttributes<HTMLButtonEle
 }
 
 export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProps>(function NineSliceButton(
-  { color = DEFAULT_LIGHT, shadowColor, textColor = "rgba(26,20,16,0.85)", pixelScale, scale = DEFAULT_SCALE, pressed, height, labelPixel, className, style, children, ...rest },
+  { color = DEFAULT_LIGHT, shadowColor, textColor = "rgba(26,20,16,0.85)", highlightColor, pixelScale, scale = DEFAULT_SCALE, pressed, height, labelPixel, className, style, children, ...rest },
   ref,
 ) {
   const ps = pixelScale ?? `${scale}px`;
@@ -156,16 +161,26 @@ export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProp
   // rails reach the very edge (inset 0). `clip-path` is anti-aliased but always
   // hidden under the opaque masked interior, so its edges never show.
   const backInset = `calc(${ps} * (var(--slice-top) - 1)) 0px ${u(CORNER - 1)} 0px`;
+  // With a custom gloss colour the outline layer draws the FRAME only (black
+  // pixels) and a second, masked layer paints the gloss in `highlightColor`;
+  // otherwise the combined outline sprite (baked white gloss) draws as before.
+  const tintGloss = highlightColor !== undefined;
   const cssVars = {
     "--u":               ps,
     "--slice-top-rest":  String(CORNER),
     "--slice-top-press": String(TOP_PRESSED),
     "--bevel-rest":      String(BEVEL),
     "--bevel-press":     String(BEVEL_PRESSED),
-    "--outline-rest":    `url("${SRC.outline}")`,
-    "--outline-press":   `url("${SRC.outlinePressed}")`,
+    "--outline-rest":    `url("${tintGloss ? SRC.frame : SRC.outline}")`,
+    "--outline-press":   `url("${tintGloss ? SRC.framePressed : SRC.outlinePressed}")`,
     "--fill-rest":       `url("${SRC.fill}")`,
     "--fill-press":      `url("${SRC.fillPressed}")`,
+    ...(tintGloss
+      ? {
+          "--hl-rest":  `url("${SRC.highlight}")`,
+          "--hl-press": `url("${SRC.highlightPressed}")`,
+        }
+      : {}),
   } as Record<string, string>;
 
   return (
@@ -257,6 +272,27 @@ export const NineSliceButton = forwardRef<HTMLButtonElement, NineSliceButtonProp
           borderImageRepeat: "stretch",
         }}
       />
+      {/* Tinted gloss — the outline's highlight pixels, painted in
+          `highlightColor` through the split highlight sprite as a 9-slice
+          mask with the SAME slices as the outline, so it lands exactly where
+          the baked white would (rest and pressed both, via --hl-mask). */}
+      {tintGloss && (
+        <span
+          aria-hidden
+          style={{
+            ...layerBase,
+            top:        0,
+            bottom:     0,
+            zIndex:     2,
+            background: highlightColor,
+            ...maskBorder(
+              "var(--hl-mask)",
+              `var(--slice-top) ${CORNER} var(--bevel-h) ${CORNER}`,
+              `${topLen} ${u(CORNER)} ${bevelLen} ${u(CORNER)}`,
+            ),
+          }}
+        />
+      )}
       <span
         className="nine-btn__content"
         // Nudged down one button-pixel: the pixel caps otherwise sit optically
