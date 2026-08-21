@@ -25,8 +25,10 @@ import {
   CHIME_WIN_MP3_DATA,
   CHIME_TICK_MP3_DATA,
   COIN_MP3_DATA,
+  COIN_DROP_MP3_DATA,
   IMPACT_MP3_DATA,
   FANFARE_MP3_DATA,
+  BLAST_MP3_DATA,
 } from "./sfx-data";
 
 /** The arcade "insert coin" chirp — a bet placed, a game joined. (Origin: the
@@ -42,8 +44,19 @@ export const CHIME_WIN_SFX_URL = CHIME_WIN_MP3_DATA;
 export const CHIME_TICK_SFX_URL = CHIME_TICK_MP3_DATA;
 /** A single coin — a payout increment, money moving. */
 export const COIN_SFX_URL = COIN_MP3_DATA;
-/** A short percussive hit — a stamp slamming down, a UI thud. */
-export const IMPACT_SFX_URL = IMPACT_MP3_DATA;
+/** The melee impact POOL (7 hits) — pick at random so repeated blows never
+ *  sound looped. Promoted from the arena, which owns the heaviest use of it. */
+export const IMPACT_SFX_URLS: readonly string[] = IMPACT_MP3_DATA;
+/** One impact, for a single UI thud (a stamp slamming down). */
+export const IMPACT_SFX_URL = IMPACT_MP3_DATA[0];
+/** A coin landing in the slot — heavier than `coin`, for money that ARRIVES. */
+export const COIN_DROP_SFX_URL = COIN_DROP_MP3_DATA;
+/** A big low blast — the arena's finale explosion. Trimmed from a 9.8 s,
+ *  2.5 MB source to the 4.2 s that carry it, so it fits the embed budget. */
+export const BLAST_SFX_URL = BLAST_MP3_DATA;
+/** The arena's repeat-bet power-up. Same recording as `riser` — one copy of
+ *  the bytes, two names, because the two uses are not the same idea. */
+export const POWER_UP_SFX_URL = RISER_MP3_DATA;
 /** The win fanfare — a jackpot, a legendary pull, a match won. ~4 s. */
 export const FANFARE_SFX_URL = FANFARE_MP3_DATA;
 
@@ -55,8 +68,11 @@ export const SFX_URLS = {
   chimeWin: CHIME_WIN_SFX_URL,
   chimeTick: CHIME_TICK_SFX_URL,
   coin: COIN_SFX_URL,
+  coinDrop: COIN_DROP_SFX_URL,
   impact: IMPACT_SFX_URL,
+  powerUp: POWER_UP_SFX_URL,
   fanfare: FANFARE_SFX_URL,
+  blast: BLAST_SFX_URL,
 } as const;
 
 export type SfxName = keyof typeof SFX_URLS;
