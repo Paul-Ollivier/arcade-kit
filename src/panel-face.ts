@@ -13,9 +13,30 @@ import { createContext, useContext } from "react";
  */
 export const PanelFaceContext = createContext<string | null>(null);
 
+/**
+ * The nearest panel's ACCENT — the one bright colour that panel already uses to
+ * say "this is the thing": the shop's carrot, the vault's gold, the pass's
+ * ocean-cyan. Every panel in the arcade had one; none of them was declared, so
+ * each was retyped as a hex at the call site and the chrome that sits ON the
+ * panel had no way to ask for it.
+ *
+ * Declaring it here makes it available to shared chrome the way the FACE
+ * already is — `CloseButton` paints its [X] in it — without any panel having to
+ * pass a colour down through its children.
+ *
+ * `null` = the panel named no accent, and chrome falls back to deriving a tone
+ * from the face (the behaviour before accents existed).
+ */
+export const PanelAccentContext = createContext<string | null>(null);
+
 /** The nearest panel's face colour, or `null` when there is no panel above. */
 export function usePanelFace(): string | null {
   return useContext(PanelFaceContext);
+}
+
+/** The nearest panel's accent colour, or `null` when it declared none. */
+export function usePanelAccent(): string | null {
+  return useContext(PanelAccentContext);
 }
 
 /** Parse `#rgb` / `#rrggbb` / `rgb()` / `rgba()` into 0–255 channels. */

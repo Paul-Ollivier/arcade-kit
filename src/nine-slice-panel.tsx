@@ -2,7 +2,7 @@
 
 import { type CSSProperties, type HTMLAttributes, forwardRef, useEffect, useState } from "react";
 import { assetUrl } from "./asset-url";
-import { PanelFaceContext } from "./panel-face";
+import { PanelAccentContext, PanelFaceContext } from "./panel-face";
 import panelPng from "./assets/ui/d8-panel-bg.png";
 import panelCashoutPng from "./assets/ui/d8-panel-cashout-bg.png";
 import panelShadePng from "./assets/ui/d8-panel-shade.png";
@@ -109,10 +109,15 @@ export interface NineSlicePanelProps extends HTMLAttributes<HTMLDivElement> {
   /** Any CSS colour for the panel fill, keeping the baked light/shadow. Takes
    *  precedence over `variant`. */
   color?: string;
+  /** This panel's ACCENT — the one bright colour it uses to say "this is the
+   *  thing" (the shop's carrot, the vault's gold). Published to the chrome
+   *  inside it: `CloseButton` paints its [X] in it. Omit and that chrome falls
+   *  back to deriving a tone from the face. */
+  accent?: string;
 }
 
 export const NineSlicePanel = forwardRef<HTMLDivElement, NineSlicePanelProps>(function NineSlicePanel(
-  { pixelScale, scale = DEFAULT_SCALE, variant = "default", color, className, style, children, ...rest },
+  { pixelScale, scale = DEFAULT_SCALE, variant = "default", color, accent, className, style, children, ...rest },
   ref,
 ) {
   const ps = pixelScale ?? `${scale}px`;
@@ -145,9 +150,12 @@ export const NineSlicePanel = forwardRef<HTMLDivElement, NineSlicePanelProps>(fu
 
   return (
     <div ref={ref} className={className} style={{ ...frame, ...style }} {...rest}>
-      {/* Publish the face so panel chrome can derive its own tone from it. */}
+      {/* Publish the face AND the accent so panel chrome can dress itself from
+          the panel rather than from a hex retyped at the call site. */}
       <PanelFaceContext.Provider value={color ?? VARIANT_FACE[variant]}>
-        {children}
+        <PanelAccentContext.Provider value={accent ?? null}>
+          {children}
+        </PanelAccentContext.Provider>
       </PanelFaceContext.Provider>
     </div>
   );

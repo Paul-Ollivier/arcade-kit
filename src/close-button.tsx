@@ -2,7 +2,7 @@
 
 import { type ButtonHTMLAttributes, type CSSProperties } from "react";
 import { NineSliceButton } from "./nine-slice-button";
-import { adjustColor, mixColor, usePanelFace } from "./panel-face";
+import { adjustColor, mixColor, usePanelAccent, usePanelFace } from "./panel-face";
 
 /**
  * The ONE close affordance for every modal across the hub and games: a
@@ -17,11 +17,14 @@ import { adjustColor, mixColor, usePanelFace } from "./panel-face";
  * fixed slate for the same reason the panels stopped being amber-only: one grey
  * chip on nine different faces reads as a part from another machine.
  *
- * The glyph AND the button's gloss (the outline's highlight row) are the same
- * hue again, but much lighter and MORE saturated — re-cut in HSL, not mixed
- * toward white (which would wash the hue out to grey) — so the control stays
- * inside the panel's family top to bottom: a violet panel gets a near-black
- * violet chip with a vivid lavender X and gloss. Still never red — closing a
+ * The X itself is the panel's ACCENT — the one bright colour that panel already
+ * uses to say "this is the thing" (the shop's carrot, the vault's gold, the
+ * pass's cyan). A panel declares it once with `accent` and every [X] inside it
+ * picks it up, so the close control reads as part of the panel it closes.
+ *
+ * A panel that names no accent falls back to the older derivation: the face's
+ * own hue, much lighter and MORE saturated — re-cut in HSL, not mixed toward
+ * white (which would wash the hue out to grey). Still never red — closing a
  * modal is safe, so red stays reserved for real danger.
  *
  * Outside a panel (floating over a canvas, say) pass `panelColor` to name the
@@ -58,10 +61,18 @@ export interface CloseButtonProps
   /** The surface's colour, when this [X] is NOT inside a NineSlicePanel.
    *  Ignored when there is a panel above — the panel always knows better. */
   panelColor?: string;
+  /** The accent to paint the X in, for chrome that is NOT inside a panel (or
+   *  that needs to override the panel's). Normally you set `accent` on the
+   *  panel instead and every [X] inside it follows. */
+  accentColor?: string;
 }
 
-export function CloseButton({ inline = false, panelColor, style, ...rest }: CloseButtonProps) {
+export function CloseButton({ inline = false, panelColor, accentColor, style, ...rest }: CloseButtonProps) {
   const face = usePanelFace() ?? panelColor ?? null;
+  const panelAccent = usePanelAccent();
+  // An explicit prop wins over the panel's declaration, which wins over the
+  // tone derived from the face.
+  const accent = accentColor ?? panelAccent;
   // mixColor/adjustColor return null for a colour we can't read (gradient, CSS
   // var); in that case fall back rather than emit a broken value.
   const btnFace = (face && mixColor(face, "black", FACE_DARKEN)) ?? SLATE_FACE;
@@ -72,7 +83,8 @@ export function CloseButton({ inline = false, panelColor, style, ...rest }: Clos
         saturation: (s) => s + INK_SATURATION_BOOST * Math.min(1, s / INK_CHROMA_RAMP),
       })) ??
     null;
-  const btnInk = vivid ?? SLATE_INK;
+  // The X takes the accent when there is one; the derived tone is the fallback.
+  const btnInk = accent ?? vivid ?? SLATE_INK;
   const btnBevel = (face && mixColor(face, "black", BEVEL_DARKEN)) ?? undefined;
 
   const placement: CSSProperties = inline
@@ -83,7 +95,7 @@ export function CloseButton({ inline = false, panelColor, style, ...rest }: Clos
       color={btnFace}
       shadowColor={btnBevel}
       textColor={btnInk}
-      highlightColor={vivid ?? undefined}
+      highlightColor={accent ?? vivid ?? undefined}
       scale={2}
       labelPixel="1.5px"
       aria-label="Close"
