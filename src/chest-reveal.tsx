@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties, type Reac
 import { createPortal } from "react-dom";
 import { BitmapText, TitleText } from "./bitmap-font";
 import { TYPE_SCALE } from "./typography";
+import { playOneShot, startRumble, type Rumble } from "./rumble";
 import "./chest-reveal.css";
 
 /**
@@ -32,10 +33,36 @@ import "./chest-reveal.css";
  *
  * Rarity palettes are the arcade's loot tints: bronze/common, silver/rare,
  * gold/epic, violet/legendary — vibrant, like the sunburst behind the cabinet.
+ *
+ * SOUND is opt-in and consumer-supplied (`sfx`): the kit can't ship these —
+ * they live in each app's `public/` and bust the kit's ~32 KB embed budget —
+ * and the two apps carry different mute state. The one exception is the rumble,
+ * which is SYNTHESISED here (see `rumble.ts`) because it has to track the
+ * shake's own escalation for an unpredictable length of time. Everything is
+ * gated on `sfxMuted`, and nothing is constructed until it plays, so a muted
+ * player downloads none of it.
  */
 
 export type RevealRarity = "common" | "rare" | "epic" | "legendary";
 export type RevealPhase = "rumble" | "blow" | "flash" | "reveal" | "shown";
+
+/** URLs for the ceremony's one-shots. Every entry is optional — a beat with no
+ *  URL is simply silent. `reveal` may be a single URL or one per rarity, so a
+ *  legendary can land on a fanfare while a common gets a ding. */
+export interface ChestRevealSfx {
+  /** Played as the chest bursts (a short explosion). */
+  blow?: string;
+  /** An upward riser under the whiteout. Started with the blow, so pick one
+   *  whose peak lands ~200 ms in. */
+  flash?: string;
+  /** The prize's arrival, as the light drains. */
+  reveal?: string | Partial<Record<RevealRarity, string>>;
+  /** The rarity stamp's slam. */
+  stamp?: string;
+  /** Set false to leave the rumble silent (the synth is on by default when
+   *  sound is enabled at all). */
+  rumble?: boolean;
+}
 
 export interface ChestRevealProps {
   /** What the chest rolled. `null` while unknown (request in flight): the
@@ -48,6 +75,14 @@ export interface ChestRevealProps {
   item: ReactNode;
   /** Slammed over the item once shown (e.g. "LEGENDARY!"). ASCII only. */
   stamp?: string;
+  /** One-shot URLs per beat (see `ChestRevealSfx`). Omit for a silent stage. */
+  sfx?: ChestRevealSfx;
+  /** The player's SFX bus is muted — plays nothing and builds nothing. Wire
+   *  this to the hub's `domin8:mute` `sfxMuted`, not to the music flag: every
+   *  sound here is a one-shot or a short bed, not a loop. */
+  sfxMuted?: boolean;
+  /** Master volume for the one-shots, 0..1. */
+  volume?: number;
   /** Buttons under the item (shown phase). Clicks inside never dismiss. */
   actions?: ReactNode;
   /** The player tapped through (or pressed Escape) after the reveal. */
@@ -82,13 +117,19 @@ const SUCK_MS = 620;
 const STAMP_DELAY_MS = 380; // after "shown" begins
 const RUMBLE_MAX_PX = 11;   // peak jitter amplitude, in px (and ~deg/1.4 of tilt)
 
-export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, caption = "TAP TO CONTINUE", zIndex = 1000 }: ChestRevealProps) {
+export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, caption = "TAP TO CONTINUE", zIndex = 1000, sfx, sfxMuted = false, volume = 1 }: ChestRevealProps) {
   const [phase, setPhase] = useState<RevealPhase>("rumble");
   const [minRumbleDone, setMinRumbleDone] = useState(false);
   const [mounted, setMounted] = useState(false);
   const reduced = useReducedMotion();
   const chestRef = useRef<HTMLDivElement>(null);
   const rumbleStart = useRef(0);
+  const rumbleRef = useRef<Rumble | null>(null);
+  // Audio is read from a ref inside the RAF loop and the phase effects, so a
+  // prop change mid-ceremony (the player hits mute) takes effect on the next
+  // frame without re-running either effect.
+  const audioRef = useRef({ sfx, sfxMuted, volume });
+  audioRef.current = { sfx, sfxMuted, volume };
 
   useEffect(() => setMounted(true), []);
 
@@ -106,6 +147,8 @@ export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, capti
     const el = chestRef.current;
     if (!el) return;
     rumbleStart.current = performance.now();
+    const sound = audioRef.current;
+    if (!sound.sfxMuted && sound.sfx?.rumble !== false && sound.sfx) rumbleRef.current = startRumble();
     let raf = 0;
     const tick = (now: number) => {
       const t = (now - rumbleStart.current) / 1000;
@@ -116,10 +159,24 @@ export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, capti
       const r = (amp / 1.4) * (Math.sin(t * 71 + 2.1) * 0.7 + Math.sin(t * 113) * 0.3);
       const s = 1 + 0.14 * ramp;
       el.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${r.toFixed(2)}deg) scale(${s.toFixed(3)})`;
+      // The synth rides the SAME ramp as the jitter, so what you hear and what
+      // you see escalate as one thing. Muting mid-rumble kills it immediately.
+      if (rumbleRef.current) {
+        if (audioRef.current.sfxMuted) {
+          rumbleRef.current.stop();
+          rumbleRef.current = null;
+        } else {
+          rumbleRef.current.setIntensity(ramp * ramp);
+        }
+      }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      rumbleRef.current?.stop();
+      rumbleRef.current = null;
+    };
   }, [phase, reduced]);
 
   // Phase machine: rumble → (roll known ∧ floor reached) → blow → flash →
@@ -136,6 +193,27 @@ export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, capti
     if (!next) return;
     const t = window.setTimeout(() => setPhase(next[0]), next[1]);
     return () => window.clearTimeout(t);
+  }, [phase]);
+
+  // One-shots, fired on the phase they belong to. The riser goes off WITH the
+  // blow rather than before it: the stage only learns the roll landed at that
+  // moment, so there is nothing to anticipate with — pick a riser whose peak
+  // sits ~200 ms in and it lands on the whiteout.
+  useEffect(() => {
+    const { sfx: s, sfxMuted: muted, volume: vol } = audioRef.current;
+    if (!s || muted) return;
+    if (phase === "blow") {
+      playOneShot(s.blow, vol);
+      playOneShot(s.flash, vol * 0.8);
+    } else if (phase === "reveal") {
+      const r = typeof s.reveal === "string" ? s.reveal : rarity ? s.reveal?.[rarity] : undefined;
+      playOneShot(r, vol);
+    } else if (phase === "shown") {
+      playOneShot(s.stamp, vol * 0.7);
+    }
+    // `rarity` is settled by the time any of these fire; re-running on it would
+    // double-play a beat if the consumer re-rendered with the same phase.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
   // Escape = tap through, once there is something to tap through to.

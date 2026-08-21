@@ -33,7 +33,11 @@ export { PlayForRealButton } from "./play-for-real-button";
 export { PlayModeToggle } from "./play-mode-toggle";
 // The shared chest-opening ceremony (full-screen rays → rumble → flash → prize).
 export { ChestReveal, REVEAL_ACCENT } from "./chest-reveal";
-export type { ChestRevealProps, RevealRarity, RevealPhase } from "./chest-reveal";
+export type { ChestRevealProps, ChestRevealSfx, RevealRarity, RevealPhase } from "./chest-reveal";
+// The ceremony's synthesised rumble, exposed for anything else that wants a
+// shake that escalates on its own clock.
+export { startRumble, playOneShot } from "./rumble";
+export type { Rumble } from "./rumble";
 export type { PlayMode, PlayModeToggleProps } from "./play-mode-toggle";
 // Renderer-agnostic button primitives (also consumed by the Pixi adapter at
 // `@domin8/arcade-kit/pixi`). Exposed so games can read the shared geometry.
