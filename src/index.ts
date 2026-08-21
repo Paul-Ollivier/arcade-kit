@@ -23,6 +23,8 @@ export { assetUrl } from "./asset-url";
 export { CHAT_BUBBLE_URL } from "./chat-bubble";
 export { DITHERED_GRADIENT_URL, DITHERED_GRADIENT_32_URL } from "./dither";
 export { GLOVE_POINTER_URL } from "./glove";
+export { ARROW_URLS, ARROW_SIZE } from "./arrows";
+export type { ArrowDir } from "./arrows";
 export { GOLDEN_COIN_URLS } from "./coins";
 export { VAULT_BIG_URL, VAULT_SMALL_URL, VAULT_TITLE_URL } from "./vault";
 export { isCabinet, isFreePlay, postGameOver, postExit, postPlayForReal } from "./cabinet";

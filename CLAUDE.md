@@ -24,7 +24,7 @@ Subpath entries (all resolve straight to source):
 
 ## Asset layout (`src/assets/`)
 
-`fonts/` (bitmap-font atlases + the woff2), `ui/` (buttons, panels, chat bubble, glove, dither gradients), `sprites/` (golden coin + vault), `audio/` (raw mp3 sources for `/sfx`), `game/` (fighter/VFX atlases, hp bars, props). First-party files are `d8-<kebab>.<ext>`; every asset is consumed via an exported URL constant, never deep-imported by consumers.
+`fonts/` (bitmap-font atlases + the woff2), `ui/` (buttons, panels, chat bubble, glove, nav arrows, dither gradients), `sprites/` (golden coin + vault), `audio/` (raw mp3 sources for `/sfx`), `game/` (fighter/VFX atlases, hp bars, props). First-party files are `d8-<kebab>.<ext>`; every asset is consumed via an exported URL constant, never deep-imported by consumers.
 
 ### DOM kit (`src/index.ts`)
 - `NineSliceButton` (`nine-slice-button.tsx` + `.css`) — imports its own interaction CSS, no global stylesheet needed.
@@ -37,7 +37,8 @@ Subpath entries (all resolve straight to source):
 - `assetUrl` (`asset-url.ts`) — normalises a PNG import that's either a URL string (bare bundler) or a Next `StaticImageData` object.
 - `GOLDEN_COIN_URLS` (`coins.ts`) — the six-frame golden-coin spin as resolved URLs (source in `assets/d8-golden-coin.aseprite`). One canonical gold coin for every game/hub; the Pixi adapter wraps it in a ready-to-load helper.
 - `VAULT_BIG_URL` / `VAULT_TITLE_URL` (`vault.ts`) — the steel vault-door sprite (116×114) + the gold "VAULT" wordmark (54×15) for THE VAULT jackpot UI (hub's `motherlode-counter.tsx`). Plain URL strings; render `image-rendering: pixelated`.
-- `CHAT_BUBBLE_URL` (`chat-bubble.ts`) / `GLOVE_POINTER_URL` (`glove.ts`) — resolved URLs for the hub's chat-tab icon and the cabinet's flanking pointing-glove nav arrow. Plain URL strings (for `<img src>` / `url(...)`), so the hub no longer carries its own `/public` copies.
+- `ARROW_URLS` + `ARROW_SIZE` + `ArrowDir` (`arrows.ts`) — the four chunky pixel nav arrows (`up`/`down`/`left`/`right`), each sprite already pointing its way so consumers never rotate/mirror. The hub's cabinet-carousel flanks and the season pass' rail scrollers. Plain URL strings; render `image-rendering: pixelated` at an integer multiple of `ARROW_SIZE`.
+- `CHAT_BUBBLE_URL` (`chat-bubble.ts`) / `GLOVE_POINTER_URL` (`glove.ts`) — resolved URLs for the hub's chat-tab icon and the pointing-glove hand (no longer the cabinet's nav arrow — see `ARROW_URLS` — but kept for anything that wants a pointing hand). Plain URL strings (for `<img src>` / `url(...)`), so the hub no longer carries its own `/public` copies.
 - Cabinet bridge (`cabinet.ts`): `isCabinet`, `isFreePlay`, `postGameOver`, `postExit`, `postPlayForReal`, type `GameResult`. The other end is the hub (`GAME_ORIGINS` whitelist).
 - `PlayForRealButton` (`play-for-real-button.tsx`), `PlayModeToggle` + `PlayMode` (`play-mode-toggle.tsx`).
 - Renderer-agnostic button geometry (`button-geometry.ts`): `BUTTON_SPRITE_URLS`, `UNIT`, `CORNER`, `BEVEL`, `SINK`, `TOP_PRESSED`, `BEVEL_PRESSED` — shared with the Pixi adapter.
