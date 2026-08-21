@@ -76,9 +76,9 @@ const RAY_PALETTES: Record<RevealRarity | "neutral", [string, string, string]> =
 };
 
 const RUMBLE_MIN_MS = 1700; // the shake builds at least this long, even on an instant roll
-const BLOW_MS = 260;
-const FLASH_HOLD_MS = 150;
-const SUCK_MS = 720;
+const BLOW_MS = 230;
+const FLASH_HOLD_MS = 110; // full-white hold between the burst and the drain
+const SUCK_MS = 620;
 const STAMP_DELAY_MS = 380; // after "shown" begins
 const RUMBLE_MAX_PX = 11;   // peak jitter amplitude, in px (and ~deg/1.4 of tilt)
 
@@ -122,18 +122,21 @@ export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, capti
     return () => cancelAnimationFrame(raf);
   }, [phase, reduced]);
 
-  // Phase machine: rumble → (roll known ∧ floor reached) → blow → flash → reveal → shown.
+  // Phase machine: rumble → (roll known ∧ floor reached) → blow → flash →
+  // reveal → shown. The gate and the chain are SEPARATE effects on purpose: a
+  // single effect keyed on `phase` would cancel its own follow-up timers in
+  // the cleanup that runs the instant it flips the phase (it did — the stage
+  // froze white on "blow").
   useEffect(() => {
     if (phase !== "rumble" || rarity === null || !minRumbleDone) return;
-    if (reduced) { setPhase("shown"); return; }
-    setPhase("blow");
-    const timers = [
-      window.setTimeout(() => setPhase("flash"), BLOW_MS),
-      window.setTimeout(() => setPhase("reveal"), BLOW_MS + FLASH_HOLD_MS),
-      window.setTimeout(() => setPhase("shown"), BLOW_MS + FLASH_HOLD_MS + SUCK_MS),
-    ];
-    return () => timers.forEach((t) => window.clearTimeout(t));
+    setPhase(reduced ? "shown" : "blow");
   }, [phase, rarity, minRumbleDone, reduced]);
+  useEffect(() => {
+    const next = NEXT_PHASE[phase];
+    if (!next) return;
+    const t = window.setTimeout(() => setPhase(next[0]), next[1]);
+    return () => window.clearTimeout(t);
+  }, [phase]);
 
   // Escape = tap through, once there is something to tap through to.
   const shown = phase === "shown";
@@ -163,7 +166,12 @@ export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, capti
       aria-modal="true"
       aria-label={stamp ? `Chest opened - ${stamp}` : "Chest opening"}
       className="d8-reveal-backdrop-in"
-      onClick={shown ? onDone : undefined}
+      // Always swallow the click: a consumer that renders this inside its own
+      // tap-to-close overlay must not have the modal close under the stage.
+      onClick={(e) => {
+        e.stopPropagation();
+        if (shown) onDone();
+      }}
       style={{ ...overlayStyle, zIndex, cursor: shown ? "pointer" : "default" }}
     >
       {/* Sunburst — its own layer so the pulse filter never touches the art. */}
@@ -204,11 +212,18 @@ export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, capti
         </div>
       )}
 
-      {/* The flash: bursts out (flash), holds, then drains into the centre (reveal). */}
-      {(phase === "flash" || phase === "reveal") && (
-        <div className={phase === "flash" ? "d8-reveal-flash-in" : "d8-reveal-flash-suck"} style={flashStyle} aria-hidden />
+      {/* The flash: ONE element across all three of its beats — it bursts out
+          with the chest (blow), holds full-screen (flash), then drains into the
+          centre (reveal). Rendering it once, in a fixed slot, is what keeps it
+          from restarting its expansion on each phase change; two elements in
+          series held the screen white for twice as long. */}
+      {(phase === "blow" || phase === "flash" || phase === "reveal") && (
+        <div
+          className={phase === "blow" ? "d8-reveal-flash-in" : phase === "reveal" ? "d8-reveal-flash-suck" : undefined}
+          style={{ ...flashStyle, ...(phase === "flash" ? { transform: "scale(1)" } : null) }}
+          aria-hidden
+        />
       )}
-      {phase === "blow" && <div className="d8-reveal-flash-in" style={{ ...flashStyle, animationDuration: `${BLOW_MS + 40}ms` }} aria-hidden />}
 
       {shown && (
         <div className="d8-reveal-rise" style={{ ...captionStyle, animationDelay: `${STAMP_DELAY_MS + 500}ms` }} aria-hidden>
@@ -225,6 +240,12 @@ export function ChestReveal({ rarity, chest, item, stamp, actions, onDone, capti
 }
 
 const PHASE_ORDER: RevealPhase[] = ["rumble", "blow", "flash", "reveal", "shown"];
+/** Each timed phase's successor and how long it holds. */
+const NEXT_PHASE: Partial<Record<RevealPhase, [RevealPhase, number]>> = {
+  blow: ["flash", BLOW_MS],
+  flash: ["reveal", FLASH_HOLD_MS],
+  reveal: ["shown", SUCK_MS],
+};
 
 function useReducedMotion(): boolean {
   const [r, setR] = useState(false);
