@@ -35,6 +35,9 @@ export { GOLDEN_COIN_URLS } from "./coins";
 export { JEWEL_URLS, BAR_URLS, TREASURE_SIZES } from "./treasure";
 export type { JewelName, BarName } from "./treasure";
 export { VAULT_BIG_URL, VAULT_SMALL_URL, VAULT_TITLE_URL } from "./vault";
+// The leaderboard's gold cup — the hub cabinet's control-panel button, and any
+// other surface that needs to say "the board" in one sprite.
+export { GOLD_CUP_URL, GOLD_CUP_SIZE } from "./trophy";
 export { isCabinet, isFreePlay, postGameOver, postExit, postPlayForReal } from "./cabinet";
 export type { GameResult } from "./cabinet";
 export { PlayForRealButton } from "./play-for-real-button";
